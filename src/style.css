@@ -1,0 +1,189 @@
+@import "tailwindcss";
+
+@theme {
+  /* ✍️ Fonts */
+  --font-sans:
+    Rubik, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol";
+
+  /* 🩵 Backgrounds & Surfaces (60% WHITE) */
+  --color-cb-base: #ffffff;
+  --color-cb-base-96: #fffffff5;
+  --color-cb-card: #f8fafc;
+  --color-cb-field: #f1f5f9;
+  --color-cb-disabled: #e5e7eb;
+  --color-cb-overlay: #00000099;
+
+  /* 🩶 Text */
+  --color-cb-text: #0c0f17; /* deep blue-black */
+  --color-cb-muted: #6b7280;
+  --color-cb-muted-40: #6b728066;
+  --color-cb-contrast: #ffffff;
+
+  /* 🔹 UI Elements (BLUE - 30%) */
+  --color-cb-divider: #e2e8f0;
+  --color-cb-tooltip: #212f90e0;
+
+  /* 🌿 Accent (TEAL - 10%) */
+  --color-cb-accent: #14b8a6;
+  --color-cb-accent-dark: #0f766e;
+  --color-cb-accent-subtle: #14b8a61a;
+  --color-cb-accent-muted: #14b8a666;
+
+  /* ⚠️ Status */
+  --color-cb-demo: #266bf7;
+  --color-cb-negative: #dc2626;
+  --color-cb-negative-subtle: #dc262633;
+  --color-cb-positive: #16a34a;
+  --color-cb-positive-subtle: #16a34a33;
+  --color-cb-warning: #d97706;
+  --color-cb-warning-subtle: #d9770633;
+}
+
+/* ===== DARK MODE ===== */
+:root,
+[data-theme="dark"] {
+  --color-cb-base: #0c0f17;
+  --color-cb-base-96: #0c0f17f5;
+  --color-cb-card: #111827;
+  --color-cb-field: #1f2937;
+  --color-cb-disabled: #1f2937;
+  --color-cb-overlay: #000000c7;
+
+  --color-cb-text: #ffffff;
+  --color-cb-muted: #9ca3af;
+  --color-cb-muted-40: #9ca3af66;
+  --color-cb-contrast: #ffffff;
+
+  --color-cb-divider: #374151;
+  --color-cb-tooltip: #000000e0;
+
+  /* Keep teal CTA consistent */
+  --color-cb-accent: #14b8a6;
+  --color-cb-accent-dark: #0f766e;
+  --color-cb-accent-subtle: #14b8a61a;
+  --color-cb-accent-muted: #14b8a666;
+
+  --color-cb-demo: #266bf7;
+  --color-cb-negative: #bf3838;
+  --color-cb-negative-subtle: #bf383833;
+  --color-cb-positive: #34a322;
+  --color-cb-positive-subtle: #34a32233;
+  --color-cb-warning: #e6c200;
+  --color-cb-warning-subtle: #e6c20033;
+}
+
+/* ===== LIGHT MODE ===== */
+[data-theme="light"] {
+  --color-cb-base: #ffffff;
+  --color-cb-base-96: #fffffff5;
+  --color-cb-card: #f8fafc;
+  --color-cb-field: #f1f5f9;
+  --color-cb-disabled: #e5e7eb;
+  --color-cb-overlay: #00000099;
+
+  --color-cb-text: #0c0f17;
+  --color-cb-muted: #6b7280;
+  --color-cb-muted-40: #6b728066;
+  --color-cb-contrast: #ffffff;
+
+  --color-cb-divider: #e5e7eb;
+  --color-cb-tooltip: #212f90e0;
+
+  --color-cb-accent: #3a2ee4;
+  --color-cb-accent-dark: #0f766e;
+  --color-cb-accent-subtle: #14b8a61a;
+  --color-cb-accent-muted: #14b8a666;
+
+  --color-cb-demo: #266bf7;
+  --color-cb-negative: #dc2626;
+  --color-cb-negative-subtle: #dc262633;
+  --color-cb-positive: #16a34a;
+  --color-cb-positive-subtle: #16a34a33;
+  --color-cb-warning: #d97706;
+  --color-cb-warning-subtle: #d9770633;
+}
+html{
+  scroll-behavior: auto !important;
+}
+
+/* ===== GLOBAL STYLES ===== */
+body {
+  background-color: var(--color-cb-base);
+  color: var(--color-cb-text);
+  font-family: var(--font-sans);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.no-transitions *,
+.no-transitions body {
+  transition: none !important;
+}
+
+button {
+  cursor: pointer;
+}
+
+input {
+  outline: none;
+  background: none;
+  border: none;
+}
+
+::selection {
+  background-color: var(--color-cb-accent);
+  color: var(--color-cb-contrast);
+}
+
+#preload-splash.fade-out {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+
+
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 3px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-cb-base);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-cb-accent);
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-cb-muted);
+}
+
+/* ===== SMOOTH TRANSITIONS ===== */
+/* * {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
+} */
+
+html {
+  
+  color-scheme: light dark;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Remove number input arrows (Firefox) */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
