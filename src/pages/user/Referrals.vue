@@ -3,8 +3,8 @@
   <div class="min-h-screen bg-cb-base">
 
     <!-- ── Page header ── -->
-    <div class=" bg-cb-card">
-       <div class="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
+    <div class="bg-cb-card">
+      <div class="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
         <div class="flex items-center gap-3">
           <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-cb-accent-subtle">
             <i class="fa-solid fa-gift text-cb-accent"></i>
@@ -17,7 +17,7 @@
       </div>
     </div>
 
-    <div class="mx-auto max-w-7xl  py-6 flex flex-col gap-4">
+    <div class="mx-auto max-w-7xl py-6 flex flex-col gap-4">
 
       <!-- ── Loading skeleton ── -->
       <template v-if="referralLoading">
@@ -46,86 +46,89 @@
           <p class="text-sm font-semibold text-cb-text">Failed to load referral info</p>
           <p class="mt-1 text-xs text-cb-muted">{{ error }}</p>
         </div>
-        <button @click="load" class="inline-flex items-center gap-2 rounded-xl bg-cb-accent px-5 py-2.5 text-sm font-semibold text-cb-contrast hover:bg-cb-accent-dark transition-colors">
+        <button
+          @click="load"
+          class="inline-flex items-center gap-2 rounded-xl bg-cb-accent px-5 py-2.5 text-sm font-semibold text-cb-contrast hover:bg-cb-accent-dark transition-colors"
+        >
           <i class="fa-solid fa-rotate-right text-xs"></i> Try again
         </button>
       </div>
 
       <template v-else-if="referralCode">
 
-       <!-- ── Hero: code + share link ── -->
-<div class="rounded-2xl border border-cb-divider bg-cb-card overflow-hidden">
-  <div class="p-5 sm:p-6 flex flex-col gap-5">
+        <!-- ── Hero: code + share link ── -->
+        <div class="rounded-2xl border border-cb-divider bg-cb-card overflow-hidden">
+          <div class="p-5 sm:p-6 flex flex-col gap-5">
 
-    <!-- Code block -->
-    <div class="flex flex-col gap-2">
-      <p class="text-[10px] font-bold uppercase tracking-widest text-cb-muted">Your referral code</p>
-      <div class="flex items-center gap-3 flex-wrap">
-        <span class="font-mono text-3xl sm:text-4xl font-extrabold tracking-[0.18em] text-cb-text leading-none">
-          {{ referralCode }}
-        </span>
-        <button
-          @click="copyCode"
-          :class="[
-            'inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-bold transition-all',
-            codeCopied
-              ? 'border-cb-positive bg-cb-positive/10 text-cb-positive'
-              : 'border-cb-accent/50 text-cb-accent hover:bg-cb-accent hover:text-cb-contrast'
-          ]"
-        >
-          <i :class="codeCopied ? 'fa-solid fa-check' : 'fa-regular fa-copy'"></i>
-          {{ codeCopied ? 'Copied!' : 'Copy code' }}
-        </button>
-      </div>
-    </div>
+            <!-- Code block -->
+            <div class="flex flex-col gap-2">
+              <p class="text-[10px] font-bold uppercase tracking-widest text-cb-muted">Your referral code</p>
+              <div class="flex items-center gap-3 flex-wrap">
+                <span class="font-mono text-3xl sm:text-4xl font-extrabold tracking-[0.18em] text-cb-text leading-none">
+                  {{ referralCode }}
+                </span>
+                <button
+                  @click="copyCode"
+                  :class="[
+                    'inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-bold transition-all',
+                    codeCopied
+                      ? 'border-cb-positive bg-cb-positive/10 text-cb-positive'
+                      : 'border-cb-accent/50 text-cb-accent hover:bg-cb-accent hover:text-cb-contrast'
+                  ]"
+                >
+                  <i :class="codeCopied ? 'fa-solid fa-check' : 'fa-regular fa-copy'"></i>
+                  {{ codeCopied ? 'Copied!' : 'Copy code' }}
+                </button>
+              </div>
+            </div>
 
-    <!-- Divider -->
-    <div class="h-px bg-cb-divider"></div>
+            <!-- Divider -->
+            <div class="h-px bg-cb-divider"></div>
 
-    <!-- Link row -->
-    <div class="flex flex-col gap-2">
-      <p class="text-[10px] font-bold uppercase tracking-widest text-cb-muted">Referral link</p>
-      <div class="flex items-stretch gap-2">
-        <div class="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-cb-divider bg-cb-field px-3 py-2.5">
-          <i class="fa-solid fa-link text-cb-muted text-xs shrink-0"></i>
-          <span class="truncate font-mono text-xs text-cb-muted select-all">{{ referralLink }}</span>
+            <!-- Link row -->
+            <div class="flex flex-col gap-2">
+              <p class="text-[10px] font-bold uppercase tracking-widest text-cb-muted">Referral link</p>
+              <div class="flex items-stretch gap-2">
+                <div class="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-cb-divider bg-cb-field px-3 py-2.5">
+                  <i class="fa-solid fa-link text-cb-muted text-xs shrink-0"></i>
+                  <span class="truncate font-mono text-xs text-cb-muted select-all">{{ referralLink }}</span>
+                </div>
+                <button
+                  @click="copyLink"
+                  :class="[
+                    'shrink-0 flex items-center gap-1.5 rounded-xl border px-4 py-2.5 text-xs font-semibold transition-all',
+                    linkCopied
+                      ? 'border-cb-accent bg-cb-accent-subtle text-cb-accent'
+                      : 'border-cb-divider bg-cb-base text-cb-muted hover:border-cb-accent hover:text-cb-accent'
+                  ]"
+                >
+                  <i :class="linkCopied ? 'fa-solid fa-check' : 'fa-solid fa-copy'"></i>
+                  {{ linkCopied ? 'Copied!' : 'Copy' }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Share buttons -->
+            <div class="flex flex-wrap gap-2">
+              <button @click="shareWhatsApp" class="share-btn whatsapp">
+                <i class="fa-brands fa-whatsapp"></i>
+                WhatsApp
+              </button>
+              <button @click="shareTwitter" class="share-btn twitter">
+                <i class="fa-brands fa-x-twitter"></i>
+                X / Twitter
+              </button>
+              <button @click="shareTelegram" class="share-btn telegram">
+                <i class="fa-brands fa-telegram"></i>
+                Telegram
+              </button>
+              <button v-if="canNativeShare" @click="nativeShare" class="share-btn native">
+                <i class="fa-solid fa-share-nodes"></i>
+                More
+              </button>
+            </div>
+          </div>
         </div>
-        <button
-          @click="copyLink"
-          :class="[
-            'shrink-0 flex items-center gap-1.5 rounded-xl border px-4 py-2.5 text-xs font-semibold transition-all',
-            linkCopied
-              ? 'border-cb-accent bg-cb-accent-subtle text-cb-accent'
-              : 'border-cb-divider bg-cb-base text-cb-muted hover:border-cb-accent hover:text-cb-accent'
-          ]"
-        >
-          <i :class="linkCopied ? 'fa-solid fa-check' : 'fa-solid fa-copy'"></i>
-          {{ linkCopied ? 'Copied!' : 'Copy' }}
-        </button>
-      </div>
-    </div>
-
-    <!-- Share buttons -->
-    <div class="flex flex-wrap gap-2">
-      <button @click="shareWhatsApp" class="share-btn whatsapp">
-        <i class="fa-brands fa-whatsapp"></i>
-        WhatsApp
-      </button>
-      <button @click="shareTwitter" class="share-btn twitter">
-        <i class="fa-brands fa-x-twitter"></i>
-        X / Twitter
-      </button>
-      <button @click="shareTelegram" class="share-btn telegram">
-        <i class="fa-brands fa-telegram"></i>
-        Telegram
-      </button>
-      <button v-if="canNativeShare" @click="nativeShare" class="share-btn native">
-        <i class="fa-solid fa-share-nodes"></i>
-        More
-      </button>
-    </div>
-  </div>
-</div>
 
         <!-- ── Bottom row: QR + How it works ── -->
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -184,10 +187,20 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '@/stores/userStore'
-import { storeToRefs } from 'pinia'
 
 const userStore = useUserStore()
-const { referralCode, referralLink, referralQrCode, referralLoading, error } = storeToRefs(userStore)
+
+// ── Mirror the same computed pattern used in ProfilePage ──────────────
+// storeToRefs was missing the user.referralCode fallback, which caused
+// the page to stay blank when the store's top-level ref hadn't been
+// seeded yet (e.g. navigating directly to /user/referral before
+// fetchMe has run).
+const user          = computed(() => userStore.user)
+const referralCode  = computed(() => userStore.referralCode  || user.value?.referralCode || '')
+const referralLink  = computed(() => userStore.referralLink  || '')
+const referralQrCode = computed(() => userStore.referralQrCode || '')
+const referralLoading = computed(() => userStore.referralLoading)
+const error         = computed(() => userStore.error)
 
 const codeCopied = ref(false)
 const linkCopied = ref(false)
@@ -210,6 +223,12 @@ const steps = [
 ]
 
 async function load() {
+  // Ensure user is loaded first so the referralCode fallback
+  // (user.value?.referralCode) is available even if fetchReferralInfo
+  // hasn't returned yet — same order as ProfilePage.
+  if (!user.value) {
+    await userStore.fetchMe()
+  }
   try {
     await userStore.fetchReferralInfo()
   } catch { }

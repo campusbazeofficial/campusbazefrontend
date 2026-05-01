@@ -404,11 +404,25 @@ function hideTooltip() {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-cb-divider) transparent;
 }
 
 .sidebar-nav::-webkit-scrollbar {
-  display: none;
+  width: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background-color: var(--color-cb-divider);
+  border-radius: 999px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-cb-muted);
 }
 
 .nav-group-label {
