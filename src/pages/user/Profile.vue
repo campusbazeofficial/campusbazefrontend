@@ -194,16 +194,52 @@
       </div>
 
       <!-- ══ REFERRAL ════════════════════════════════ -->
-      <div class="rounded-xl bg-[var(--color-cb-accent-subtle)] px-5 py-4 flex items-center justify-between gap-4">
-        <div>
-          <p class="text-xs font-semibold text-[var(--color-cb-accent)] mb-0.5 uppercase tracking-wider">Your referral code</p>
-          <p class="text-base tracking-widest text-[var(--color-cb-text)]">{{ user.referralCode }}</p>
-        </div>
-        <button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-cb-card)] border border-[var(--color-cb-divider)] text-xs font-bold text-[var(--color-cb-text)] hover:border-[var(--color-cb-accent)] transition-colors flex-shrink-0" @click="copy(user.referralCode)">
+    <div class="rounded-2xl bg-[var(--color-cb-accent-subtle)] p-5">
+  <div v-if="referralLoading" class="animate-pulse space-y-3">
+    <div class="h-4 w-32 rounded bg-[var(--color-cb-card)]"></div>
+    <div class="h-6 w-40 rounded bg-[var(--color-cb-card)]"></div>
+    <div class="h-24 w-24 rounded-xl bg-[var(--color-cb-card)]"></div>
+  </div>
+
+  <div v-else class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+    <!-- Left -->
+    <div class="min-w-0">
+      <p class="text-xs font-semibold text-[var(--color-cb-accent)] uppercase tracking-wider mb-1">
+        Your referral code
+      </p>
+
+      <p class="text-lg tracking-[0.25em] text-[var(--color-cb-text)] mb-2">
+        {{ referralCode }}
+      </p>
+
+      <p class="text-xs text-[var(--color-cb-muted)] break-all">
+        {{ referralLink }}
+      </p>
+
+      <div class="flex flex-wrap gap-2 mt-3">
+        <button
+          class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-cb-card)] border border-[var(--color-cb-divider)] text-xs font-bold text-[var(--color-cb-text)] hover:border-[var(--color-cb-accent)] transition-colors"
+          @click="copy(referralLink)"
+        >
           <i :class="copied ? 'fa-solid fa-check text-[var(--color-cb-positive)]' : 'fa-solid fa-copy'"></i>
-          {{ copied ? 'Copied!' : 'Copy link' }}
+          {{ copied ? 'Copied!' : 'Copy signup link' }}
         </button>
       </div>
+    </div>
+
+    <!-- Right -->
+    <div
+      v-if="referralQrCode"
+      class="flex-shrink-0 rounded-2xl bg-white p-3 border border-[var(--color-cb-divider)] self-start"
+    >
+      <img
+        :src="referralQrCode"
+        alt="Referral QR Code"
+        class="w-28 h-28 object-contain"
+      />
+    </div>
+  </div>
+</div>
 
       <!-- ══ PERSONAL INFO ══════════════════════════ -->
       <div class="rounded-2xl bg-[var(--color-cb-card)] p-5 flex flex-col gap-5">
@@ -403,7 +439,10 @@ const company     = computed(() => userStore.company)
 const isCorporate = computed(() => userStore.isCorporate)
 const userError   = computed(() => userStore.error)
 const initialLoading = computed(() => userStore.loading && !user.value)
-
+const referralCode = computed(() => userStore.referralCode || user.value?.referralCode || '')
+const referralLink = computed(() => userStore.referralLink || '')
+const referralQrCode = computed(() => userStore.referralQrCode || '')
+const referralLoading = computed(() => userStore.referralLoading)
 const actionLoading = ref(false)
 const actionLabel   = ref('')
 const saveError     = ref('')
@@ -522,7 +561,14 @@ const completenessPercent = computed(() => {
 })
 
 function showToast(type, message) { toast.value = { show: true, type, message }; setTimeout(() => { toast.value.show = false }, 3500) }
-function copy(text) { navigator.clipboard.writeText(text); copied.value = true; setTimeout(() => { copied.value = false }, 2000) }
+async function copy(text) {
+  if (!text) return
+  await navigator.clipboard.writeText(text)
+  copied.value = true
+  setTimeout(() => {
+    copied.value = false
+  }, 2000)
+}
 
 async function withOverlay(label, fn) { actionLabel.value = label; actionLoading.value = true; try { await fn() } finally { actionLoading.value = false; actionLabel.value = '' } }
 
@@ -568,7 +614,13 @@ function copyGeneratedBio() { if (!generatedBio.value) return; navigator.clipboa
 
 async function load() {
   await userStore.fetchMe()
-  if (user.value) await vStore.fetchVerificationStatus()
+
+  if (user.value) {
+    await Promise.all([
+      vStore.fetchVerificationStatus(),
+      userStore.fetchReferralInfo(),
+    ])
+  }
 }
 onMounted(load)
 </script>
