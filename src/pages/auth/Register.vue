@@ -217,8 +217,8 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { getErrorMessage } from '@/utils/apiErrorHandler'
 import AuthLayout from '@/components/auth/AuthLayout.vue'
@@ -226,23 +226,32 @@ import AuthInput from '@/components/auth/AuthInput.vue'
 import AuthCheckbox from '@/components/auth/AuthCheckbox.vue'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
-
 const step = ref(0)
 const totalSteps = 2
 const accountType = ref(null)
 const errors = ref({})
-
 const form = ref({
-  firstName: '', lastName: '', email: '', phone: '',
-  isStudent: true, institutionName: '',
-  password: '', confirmPassword: '', referralCode: '',
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone: '',
+  isStudent: true,
+  institutionName: '',
+  password: '',
+  confirmPassword: '',
+  referralCode: route.query.ref?.toString() || '',
   agreedToTerms: false,
-  companyName: '', companyEmail: '', companyPhone: '',
-  rcNumber: '', industry: '', website: '',
-  country: 'Nigeria', state: '',
+  companyName: '',
+  companyEmail: '',
+  companyPhone: '',
+  rcNumber: '',
+  industry: '',
+  website: '',
+  country: 'Nigeria',
+  state: '',
 })
-
 // referralCode is a plain optional field — no live validation, just submitted with the form
 
 // ── Inline validation ──

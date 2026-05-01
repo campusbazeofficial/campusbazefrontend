@@ -50,7 +50,11 @@ export const useUserStore = defineStore("user", () => {
 
   // ➕ NEW: Referral getters
   const referralCode = computed(() => referralInfo.value?.referralCode || null);
-  const referralLink = computed(() => referralInfo.value?.referralLink || null);
+  const referralLink = computed(() => {
+  const code = referralInfo.value?.referralCode;
+  if (!code) return null;
+  return `${window.location.origin}/auth/register?ref=${code}`;
+});
   const referralQrCode = computed(() => referralInfo.value?.qrCode || null);
 
   // ── Actions ───────────────────────────────────────────────
