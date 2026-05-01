@@ -12,11 +12,16 @@ export const userLinks = [
   {
     group: null,
     items: [
-      {
-        path: "/user/dashboard",
-        label: "Dashboard",
-        icon: "fa-solid fa-house",
-      },
+        {
+      path: "/",
+      label: "Home",
+      icon: "fa-solid fa-house-chimney",
+    },
+    {
+      path: "/user/dashboard",
+      label: "Dashboard",
+      icon: "fa-solid fa-gauge-high", 
+    },
       {
         path: "/user/chat",
         label: "Messages",
