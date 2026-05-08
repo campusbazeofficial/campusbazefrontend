@@ -153,7 +153,7 @@
                 <!-- posted → runner awaiting -->
                 <div v-else-if="!isMyErrand && hasUserBid && errand.status === 'posted'" class="space-y-2">
                   <div class="flex items-start gap-3 rounded-xl border border-cb-warning/40 bg-cb-warning-subtle p-3">
-                    <i class="fa-regular fa-hourglass-half mt-0.5 shrink-0 text-cb-warning"></i>
+                    <!-- <i class="fa-regular fa-hourglass-half mt-0.5 shrink-0 text-cb-warning"></i> -->
                     <div>
                       <p class="text-sm font-bold text-cb-warning">Awaiting Acceptance</p>
                       <p class="mt-0.5 text-xs text-cb-warning/80">The poster will accept or reject your bid.</p>
@@ -161,7 +161,7 @@
                   </div>
                   <button @click="handleWithdraw(errand.bids?.find(b => b.status === 'pending')?._id)" :disabled="errandStore.actionLoading"
                     class="flex w-full items-center justify-center gap-2 rounded-xl border border-cb-negative/30 bg-cb-negative-subtle py-2.5 text-sm font-semibold text-cb-negative hover:opacity-90 disabled:opacity-60">
-                    <i class="fa-solid fa-xmark text-xs"></i> Withdraw bid
+                    <!-- <i class="fa-solid fa-xmark text-xs"></i> Withdraw bid -->
                   </button>
                 </div>
 

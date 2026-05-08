@@ -34,10 +34,10 @@ export const reviewApi = {
   },
 
   // ── Public User Reviews ───────────────────────────────────
-  async getUserReviews(userId, params = {}) {
+    async getPublicReviews(params = {}) {
     const response = await withRetry(
-      () => api.get(`/api/v1/reviews/${userId}`, { params }),
-      "getUserReviews",
+      () => api.get("/api/v1/reviews", { params }),
+      "getPublicReviews",
     );
 
     return response.data;

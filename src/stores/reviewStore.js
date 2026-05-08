@@ -5,6 +5,7 @@ export const useReviewStore = defineStore("review", {
   state: () => ({
     myReviews: [],
     userReviews: [],
+    publicReviews: [], // Added for public reviews
 
     loading: false,
     error: null,
@@ -32,6 +33,7 @@ export const useReviewStore = defineStore("review", {
     reset() {
       this.myReviews = [];
       this.userReviews = [];
+      this.publicReviews = [];
       this.error = null;
       this.meta = {
         total: 0,
@@ -87,6 +89,29 @@ export const useReviewStore = defineStore("review", {
       } catch (err) {
         this.error =
           err?.response?.data?.message || "Failed to load your reviews";
+        throw err;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // ─────────────────────────────────────────────
+    // GET PUBLIC REVIEWS (for testimonials)
+    // ─────────────────────────────────────────────
+    async fetchPublicReviews(params = { page: 1, limit: 20 }) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const res = await reviewApi.getPublicReviews(params);
+
+        this.publicReviews = res?.data || [];
+        this.meta = res?.meta || this.meta;
+
+        return res;
+      } catch (err) {
+        this.error =
+          err?.response?.data?.message || "Failed to load reviews";
         throw err;
       } finally {
         this.loading = false;

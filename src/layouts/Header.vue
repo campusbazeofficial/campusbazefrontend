@@ -1,7 +1,7 @@
 <template>
   <header class="sticky top-0 z-50 bg-cb-base-96 backdrop-blur-md">
     <nav
-      class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-6 sm:gap-8"
+      class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-2 min-[1180px]:gap-3 lg:gap-8"
     >
       <!-- Logo -->
       <router-link to="/" class="shrink-0 flex items-center">
@@ -13,13 +13,14 @@
       </router-link>
 
       <!-- Desktop Navigation -->
-      <div class="hidden md:flex items-center gap-1 flex-1 justify-center">
+      <div class="hidden min-[1180px]:flex items-center gap-0 lg:gap-1 flex-1 justify-center">
         <template v-for="link in navLinks" :key="link.label">
           <!-- Hash scroll link -->
           <a
             v-if="link.hash"
             :href="link.to"
             class="nav-link"
+            :class="{ active: activeHash === link.hash }"
             @click.prevent="scrollToSection(link.hash)"
           >
             {{ link.label }}
@@ -29,14 +30,15 @@
             v-else-if="!link.dropdown"
             :to="link.to"
             class="nav-link"
-            exact-active-class="active"
+            :exact-active-class="activeHash ? '' : 'active'"
+            @click="activeHash = null"
           >
             {{ link.label }}
           </router-link>
         </template>
 
         <!-- Legal Dropdown (Desktop) -->
-        <div 
+        <div
           v-if="isLegalDropdownVisible"
           class="relative"
           v-click-outside="() => legalDropdownOpen = false"
@@ -49,7 +51,7 @@
             Legal
             <i class="fa-solid fa-chevron-down text-xs" :class="{ 'rotate-180': legalDropdownOpen }"></i>
           </button>
-          
+
           <Transition name="dropdown">
             <div
               v-show="legalDropdownOpen"
@@ -87,23 +89,26 @@
         <router-link
           v-if="isAuthenticated"
           to="/user/dashboard"
-          class="hidden md:flex items-center gap-2 px-4 py-2.5 bg-cb-accent text-cb-contrast rounded-lg font-semibold text-sm hover:bg-cb-accent-dark"
+          class="hidden min-[1180px]:flex items-center gap-2 px-3 lg:px-4 py-2.5 bg-cb-accent text-cb-contrast rounded-lg font-semibold text-sm hover:bg-cb-accent-dark shrink-0"
+          title="My Dashboard"
         >
-          My Dashboard
+          <i class="fa-solid fa-gauge-high"></i>
+          <span class="hidden lg:inline">My Dashboard</span>
         </router-link>
         <router-link
           v-else
           to="/auth/login"
-          class="hidden md:flex items-center gap-2 px-4 py-2.5 bg-cb-accent text-cb-contrast rounded-lg font-semibold text-sm hover:bg-cb-accent-dark"
+          class="hidden min-[1180px]:flex items-center gap-2 px-3 lg:px-4 py-2.5 bg-cb-accent text-cb-contrast rounded-lg font-semibold text-sm hover:bg-cb-accent-dark shrink-0"
+          title="Sign in"
         >
           <i class="fa-solid fa-arrow-right-to-bracket"></i>
-          Sign in
+          <span class="hidden lg:inline">Sign in</span>
         </router-link>
 
         <!-- Mobile Menu Toggle -->
         <button
           @click="isMobileMenuOpen = !isMobileMenuOpen"
-          class="md:hidden flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 cursor-pointer p-0 bg-transparent border-none"
+          class="min-[1180px]:hidden flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 cursor-pointer p-0 bg-transparent border-none"
           :aria-expanded="isMobileMenuOpen"
           aria-label="Toggle navigation menu"
         >
@@ -118,24 +123,36 @@
     <Transition name="overlay">
       <div
         v-if="isMobileMenuOpen"
-        class="md:hidden fixed inset-0 z-40"
+        class="min-[1180px]:hidden fixed inset-0 z-40"
         style="background-color: var(--color-cb-overlay)"
         @click="isMobileMenuOpen = false"
       />
     </Transition>
 
-    <!-- Mobile Drawer -->
-    <Transition name="drawer">
+    <!-- Mobile Bottom Sheet -->
+    <Transition name="bottom-sheet">
       <div
         v-if="isMobileMenuOpen"
-        class="md:hidden fixed top-0 right-0 z-50 w-72 flex flex-col shadow-xl"
-        style="height: 100dvh; background-color: var(--color-cb-card)"
+        class="min-[1180px]:hidden fixed bottom-0 left-0 right-0 z-50 flex flex-col rounded-t-2xl shadow-2xl"
+        style="
+          max-height: 85dvh;
+          background-color: var(--color-cb-card);
+        "
       >
-        <!-- Drawer Header -->
+        <!-- Drag Handle -->
+        <div class="flex justify-center pt-3 pb-1 shrink-0">
+          <div
+            class="w-10 h-1 rounded-full"
+            style="background-color: var(--color-cb-divider)"
+          ></div>
+        </div>
+
+        <!-- Sheet Header -->
         <div
-          class="flex items-center justify-end px-6 py-4"
+          class="flex items-center justify-between px-5 py-3 shrink-0"
           style="border-bottom: 1px solid var(--color-cb-divider)"
         >
+          <span class="text-sm font-semibold" style="color: var(--color-cb-muted)">Menu</span>
           <button
             @click="isMobileMenuOpen = false"
             class="w-8 h-8 flex items-center justify-center rounded-lg border-none cursor-pointer"
@@ -146,13 +163,14 @@
         </div>
 
         <!-- Nav Links (Mobile) -->
-        <nav class="flex flex-col px-4 py-6 gap-1 flex-1 overflow-y-auto">
+        <nav class="flex flex-col px-4 py-4 gap-1 overflow-y-auto flex-1">
           <template v-for="(link, index) in navLinks" :key="link.label">
             <a
               v-if="link.hash"
               :href="link.to"
               class="mobile-nav-link"
-              :style="{ animationDelay: `${100 + index * 100}ms` }"
+              :class="{ active: activeHash === link.hash }"
+              :style="{ animationDelay: `${50 + index * 60}ms` }"
               @click.prevent="scrollToSection(link.hash, true)"
             >
               {{ link.label }}
@@ -161,9 +179,9 @@
               v-else-if="!link.dropdown"
               :to="link.to"
               class="mobile-nav-link"
-              :style="{ animationDelay: `${100 + index * 100}ms` }"
-              exact-active-class="active"
-              @click="isMobileMenuOpen = false"
+              :style="{ animationDelay: `${50 + index * 60}ms` }"
+              :exact-active-class="activeHash ? '' : 'active'"
+              @click="isMobileMenuOpen = false; activeHash = null"
             >
               {{ link.label }}
             </router-link>
@@ -174,15 +192,15 @@
             <button
               @click="mobileLegalOpen = !mobileLegalOpen"
               class="mobile-nav-link w-full flex items-center justify-between"
-              :style="{ animationDelay: `${100 + navLinks.length * 100}ms` }"
+              :style="{ animationDelay: `${50 + navLinks.length * 60}ms` }"
             >
               <span>Legal</span>
-              <i 
+              <i
                 class="fa-solid fa-chevron-down text-xs transition-transform duration-200"
                 :class="{ 'rotate-180': mobileLegalOpen }"
               ></i>
             </button>
-            
+
             <Transition
               name="accordion"
               @enter="onAccordionEnter"
@@ -205,12 +223,12 @@
           </div>
         </nav>
 
-        <!-- Auth Button (Mobile) - Conditional -->
-        <div class="px-4 pb-8">
+        <!-- Auth Button (Mobile) -->
+        <div class="px-4 pt-2 pb-8 shrink-0" style="border-top: 1px solid var(--color-cb-divider)">
           <router-link
             v-if="isAuthenticated"
             to="/user/dashboard"
-            class="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-lg font-semibold text-sm no-underline"
+            class="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-lg font-semibold text-sm no-underline mt-3"
             style="
               background-color: var(--color-cb-accent);
               color: var(--color-cb-contrast);
@@ -222,7 +240,7 @@
           <router-link
             v-else
             to="/auth/login"
-            class="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-lg font-semibold text-sm no-underline"
+            class="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-lg font-semibold text-sm no-underline mt-3"
             style="
               background-color: var(--color-cb-accent);
               color: var(--color-cb-contrast);
@@ -239,7 +257,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useTheme } from "@/composables/Usetheme";
 import { useAuthStore } from "@/stores/authStore";
@@ -251,9 +269,15 @@ const { theme, toggleTheme } = useTheme();
 const isMobileMenuOpen = ref(false);
 const legalDropdownOpen = ref(false);
 const mobileLegalOpen = ref(false);
+const activeHash = ref(null);
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
+
+// Clear hash active state when navigating away from home page
+watch(() => route.path, (path) => {
+  if (path !== "/") activeHash.value = null;
+});
 
 // v-click-outside directive for closing dropdown when clicking outside
 const vClickOutside = {
@@ -275,7 +299,6 @@ function onAccordionEnter(el) {
   el.style.height = "0";
   el.style.opacity = "0";
   el.style.overflow = "hidden";
-  // Force reflow
   el.offsetHeight;
   el.style.transition = "height 0.25s ease, opacity 0.25s ease";
   el.style.height = el.scrollHeight + "px";
@@ -292,7 +315,6 @@ function onAccordionAfterEnter(el) {
 function onAccordionLeave(el) {
   el.style.height = el.scrollHeight + "px";
   el.style.overflow = "hidden";
-  // Force reflow
   el.offsetHeight;
   el.style.transition = "height 0.25s ease, opacity 0.25s ease";
   el.style.height = "0";
@@ -315,6 +337,7 @@ const navLinks = [
   { to: "/about", label: "About Us", hash: null },
   { to: "/subscription", label: "Subscription Plans", hash: null },
   { to: "/#faq", label: "FAQ", hash: "faq" },
+  { to: "/contact", label: "Contact Us", hash: null },
 ];
 
 const legalLinks = [
@@ -329,19 +352,17 @@ const isLegalRouteActive = computed(() => {
   return legalLinks.some(link => route.path === link.path);
 });
 
-// Check if legal dropdown should be visible on desktop (not on legal pages where it might be redundant)
+// Check if legal dropdown should be visible on desktop
 const isLegalDropdownVisible = computed(() => {
-  // You can always show it, or conditionally hide on legal pages
   return true;
 });
 
 async function scrollToSection(id, closeMenu = false) {
   if (closeMenu) isMobileMenuOpen.value = false;
+  activeHash.value = id;
 
-  // If not on home page, navigate there first then scroll
   if (route.path !== "/") {
     await router.push("/");
-    // Wait for next tick so DOM is ready
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
 
@@ -360,7 +381,7 @@ const currentLogo = computed(() =>
 @reference "@/style.css";
 
 .nav-link {
-  @apply px-4 py-2 text-sm font-medium text-cb-muted no-underline rounded-lg hover:text-cb-accent hover:bg-cb-accent-subtle cursor-pointer;
+  @apply px-2 py-2 lg:px-4 text-xs lg:text-sm font-medium text-cb-muted no-underline rounded-lg hover:text-cb-accent hover:bg-cb-accent-subtle cursor-pointer whitespace-nowrap;
 }
 
 .nav-link.active {
@@ -378,7 +399,7 @@ const currentLogo = computed(() =>
   border: none;
   color: var(--color-cb-muted);
   opacity: 0;
-  animation: fadeSlideIn 0.4s ease forwards;
+  animation: fadeSlideUp 0.35s ease forwards;
   cursor: pointer;
 }
 
@@ -465,27 +486,28 @@ const currentLogo = computed(() =>
   opacity: 0;
 }
 
-.drawer-enter-active,
-.drawer-leave-active {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* Bottom Sheet Animations */
+.bottom-sheet-enter-active,
+.bottom-sheet-leave-active {
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.drawer-enter-from,
-.drawer-leave-to {
-  transform: translateX(100%);
+.bottom-sheet-enter-from,
+.bottom-sheet-leave-to {
+  transform: translateY(100%);
 }
 
 .rotate-180 {
   transform: rotate(180deg);
 }
 
-@keyframes fadeSlideIn {
+@keyframes fadeSlideUp {
   from {
     opacity: 0;
-    transform: translateX(30px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0);
   }
 }
 </style>
