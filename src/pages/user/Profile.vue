@@ -696,7 +696,12 @@ async function savePersonal() {
       }
       if (isCorporate.value) await userStore.updateCorporateMe(payload)
       else await userStore.updateMe(payload)
-      if (userStore.profile?.user) { Object.assign(userStore.profile.user, payload); localStorage.setItem('user', JSON.stringify(userStore.profile.user)) }
+      // Deep-merge location into local store state so the UI reflects it immediately
+      // (the store's updateMe merges res.data.user which may omit unchanged nested fields)
+      if (userStore.profile?.user) {
+        userStore.profile.user.location = { ...payload.location }
+        localStorage.setItem('user', JSON.stringify(userStore.profile.user))
+      }
       editProfileModalOpen.value = false
       showToast('success', 'Profile updated successfully')
     } catch (e) { saveError.value = e.response?.data?.message || 'Failed to save changes' }

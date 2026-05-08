@@ -19,6 +19,10 @@ export const useUserStore = defineStore("user", () => {
   const referralInfo = ref(null);
   const referralLoading = ref(false);
 
+  // ➕ NEW: Recent searches state
+  const recentSearches = ref([]);
+  const recentSearchesLoading = ref(false);
+
   // ── Getters ───────────────────────────────────────────────
   const user = computed(() => profile.value?.user || null);
   const company = computed(() => profile.value?.company || null);
@@ -51,10 +55,10 @@ export const useUserStore = defineStore("user", () => {
   // ➕ NEW: Referral getters
   const referralCode = computed(() => referralInfo.value?.referralCode || null);
   const referralLink = computed(() => {
-  const code = referralInfo.value?.referralCode;
-  if (!code) return null;
-  return `${window.location.origin}/auth/register?ref=${code}`;
-});
+    const code = referralInfo.value?.referralCode;
+    if (!code) return null;
+    return `${window.location.origin}/auth/register?ref=${code}`;
+  });
   const referralQrCode = computed(() => referralInfo.value?.qrCode || null);
 
   // ── Actions ───────────────────────────────────────────────
@@ -105,7 +109,16 @@ export const useUserStore = defineStore("user", () => {
     try {
       const res = await userApi.updateMe(data);
       if (profile.value?.user) {
-        profile.value.user = { ...profile.value.user, ...res.data?.user };
+        const updated = res.data?.user || {};
+        profile.value.user = { ...profile.value.user, ...updated };
+        // Ensure nested location is preserved from the sent payload when the
+        // API response omits it or returns it partially
+        if (data.location) {
+          profile.value.user.location = {
+            ...(profile.value.user.location || {}),
+            ...data.location,
+          };
+        }
         localStorage.setItem("user", JSON.stringify(profile.value.user));
       }
       return res;
@@ -123,7 +136,15 @@ export const useUserStore = defineStore("user", () => {
     try {
       const res = await userApi.updateCorporateMe(data);
       if (profile.value?.user) {
-        profile.value.user = { ...profile.value.user, ...res.data?.user };
+        const updated = res.data?.user || {};
+        profile.value.user = { ...profile.value.user, ...updated };
+        // Ensure nested location is preserved from the sent payload
+        if (data.location) {
+          profile.value.user.location = {
+            ...(profile.value.user.location || {}),
+            ...data.location,
+          };
+        }
         localStorage.setItem("user", JSON.stringify(profile.value.user));
       }
       if (profile.value?.company) {
@@ -308,6 +329,37 @@ export const useUserStore = defineStore("user", () => {
     }
   }
 
+  // ➕ NEW: Recent searches actions
+  async function fetchRecentSearches() {
+    recentSearchesLoading.value = true;
+    error.value = null;
+    try {
+      const res = await userApi.getRecentSearches();
+      recentSearches.value = res.data || [];
+      return res;
+    } catch (err) {
+      error.value = err.response?.data?.message || "Failed to load recent searches";
+      throw err;
+    } finally {
+      recentSearchesLoading.value = false;
+    }
+  }
+
+  async function clearRecentSearches() {
+    recentSearchesLoading.value = true;
+    error.value = null;
+    try {
+      const res = await userApi.clearRecentSearches();
+      recentSearches.value = [];
+      return res;
+    } catch (err) {
+      error.value = err.response?.data?.message || "Failed to clear recent searches";
+      throw err;
+    } finally {
+      recentSearchesLoading.value = false;
+    }
+  }
+
   function clearUser() {
     profile.value = null;
     dashboard.value = null;
@@ -315,6 +367,7 @@ export const useUserStore = defineStore("user", () => {
     error.value = null;
     initialized.value = false;
     referralInfo.value = null; // ➕ NEW: clear referral info on logout
+    recentSearches.value = []; // ➕ NEW: clear recent searches on logout
     localStorage.removeItem("user");
   }
 
@@ -378,5 +431,10 @@ export const useUserStore = defineStore("user", () => {
     referralLink,
     referralQrCode,
     fetchReferralInfo,
+    // ➕ NEW: Recent searches exports
+    recentSearches,
+    recentSearchesLoading,
+    fetchRecentSearches,
+    clearRecentSearches,
   };
 });

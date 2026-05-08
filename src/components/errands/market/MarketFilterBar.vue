@@ -284,26 +284,32 @@
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div class="flex flex-col gap-1">
               <label class="text-[10px] font-semibold text-cb-muted">State</label>
-              <input
+             <div class="border border-cb-divider bg-cb-base rounded-md">
+               <input
                 :value="filters.locationState"
                 type="text"
                 placeholder="e.g. Lagos"
-                class="w-full rounded-lg border border-cb-divider bg-cb-base px-2.5 py-1.5 text-xs text-cb-text focus:border-cb-accent focus:outline-none"
+                class="w-full rounded-lg px-2.5 py-1.5 text-xs text-cb-text focus:border-cb-accent focus:outline-none"
                 @input="onLocationInput('locationState', $event.target.value)"
               />
+             </div>
             </div>
             <div class="flex flex-col gap-1">
               <label class="text-[10px] font-semibold text-cb-muted">Local Govt Area</label>
-              <input
+              <div class="border border-cb-divider bg-cb-base rounded-md">
+                  <input
                 :value="filters.locationLocalGovt"
                 type="text"
                 placeholder="e.g. Ikeja"
                 class="w-full rounded-lg border border-cb-divider bg-cb-base px-2.5 py-1.5 text-xs text-cb-text focus:border-cb-accent focus:outline-none"
                 @input="onLocationInput('locationLocalGovt', $event.target.value)"
               />
+              </div>
+            
             </div>
             <div class="flex flex-col gap-1">
               <label class="text-[10px] font-semibold text-cb-muted">Village / Area <span class="font-normal">(optional)</span></label>
+              <div class="border border-cb-divider bg-cb-base rounded-md">
               <input
                 :value="filters.locationVillage"
                 type="text"
@@ -311,6 +317,7 @@
                 class="w-full rounded-lg border border-cb-divider bg-cb-base px-2.5 py-1.5 text-xs text-cb-text focus:border-cb-accent focus:outline-none"
                 @input="onLocationInput('locationVillage', $event.target.value)"
               />
+              </div>  
             </div>
           </div>
         </div>

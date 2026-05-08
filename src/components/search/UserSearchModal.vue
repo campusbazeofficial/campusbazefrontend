@@ -39,13 +39,40 @@
     <!-- Initial state -->
     <div
       v-if="!hasSearched"
-      class="flex flex-col items-center justify-center gap-3 px-4 py-20 text-center"
+      class="flex flex-col gap-6 px-4 py-8 sm:px-6"
     >
-      <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-cb-accent-subtle">
-        <i class="fa-solid fa-magnifying-glass text-2xl text-cb-accent"></i>
+      <!-- Recent searches section -->
+      <div v-if="recentSearches.length > 0" class="space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-cb-muted">Recent</h3>
+          <button
+            @click="handleClearRecent"
+            class="text-xs font-medium text-cb-accent hover:text-cb-accent-hover transition-colors"
+          >
+            Clear all
+          </button>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-for="(term, index) in recentSearches"
+            :key="index"
+            @click="searchRecent(term)"
+            class="inline-flex items-center gap-1.5 rounded-lg border border-cb-divider bg-cb-card px-3 py-1.5 text-sm text-cb-text transition-colors hover:bg-cb-field hover:border-cb-muted"
+          >
+            <i class="fa-solid fa-clock-rotate-left text-[10px] text-cb-muted"></i>
+            {{ term }}
+          </button>
+        </div>
       </div>
-      <p class="text-sm font-semibold text-cb-text">Search for users</p>
-      <p class="text-xs text-cb-muted">Find runners, students and service providers on campus</p>
+
+      <!-- Empty search prompt -->
+      <div class="flex flex-col items-center justify-center gap-3 py-12 text-center">
+        <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-cb-accent-subtle">
+          <i class="fa-solid fa-magnifying-glass text-2xl text-cb-accent"></i>
+        </div>
+        <p class="text-sm font-semibold text-cb-text">Search for users</p>
+        <p class="text-xs text-cb-muted">Find runners, students and service providers on campus</p>
+      </div>
     </div>
 
     <!-- Loading -->
@@ -138,7 +165,7 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import { debounce } from '@/utils/debounce'
@@ -160,6 +187,9 @@ const currentPage = ref(1)
 const hasMore = ref(false)
 
 const filters = ref({ role: '', isStudent: false })
+
+// ➕ NEW: Recent searches from store
+const recentSearches = computed(() => userStore.recentSearches)
 
 const debouncedSearch = debounce(() => {
   currentPage.value = 1
@@ -233,6 +263,32 @@ function goToProfile(user) {
   router.push({ name: 'ServiceProviderProfile', params: { identifier: user.slug } })
 }
 
+// ➕ NEW: Search from recent terms
+function searchRecent(term) {
+  query.value = term
+  hasSearched.value = true
+  currentPage.value = 1
+  doSearch(1)
+}
+
+// ➕ NEW: Clear all recent searches
+async function handleClearRecent() {
+  try {
+    await userStore.clearRecentSearches()
+  } catch {
+    // silent
+  }
+}
+
+// ➕ NEW: Fetch recent searches when modal opens
+async function loadRecentSearches() {
+  try {
+    await userStore.fetchRecentSearches()
+  } catch {
+    // silent — recent searches are optional
+  }
+}
+
 // Auto-focus input when modal opens
 watch(
   () => props.modelValue,
@@ -240,6 +296,8 @@ watch(
     if (open) {
       await nextTick()
       inputRef.value?.focus()
+      // Load recent searches
+      loadRecentSearches()
     } else {
       // Reset state on close
       clearSearch()
