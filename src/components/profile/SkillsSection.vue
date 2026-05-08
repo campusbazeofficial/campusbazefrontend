@@ -421,19 +421,12 @@ const proficiencyOptions = [
     class: 'bg-[var(--color-cb-warning-subtle)] text-[var(--color-cb-warning)]',
   },
   {
-    value: 'advanced',
-    label: 'Advanced',
-    desc: 'Strong hands-on experience',
-    class: 'bg-[var(--color-cb-success-subtle)] text-[var(--color-cb-success)]',
-  },
-  {
     value: 'expert',
     label: 'Expert',
     desc: 'Deep mastery & authority',
     class: 'bg-[var(--color-cb-primary-subtle)] text-[var(--color-cb-primary)]',
   },
 ]
-
 const proficiencyMeta = Object.fromEntries(proficiencyOptions.map((o) => [o.value, o]))
 
 const getProficiencyLabel = (level) => proficiencyMeta[level]?.label || level || 'Unknown'

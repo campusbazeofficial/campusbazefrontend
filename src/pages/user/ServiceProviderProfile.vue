@@ -38,7 +38,7 @@
 
             <div class="flex-1 min-w-0">
               <div class="flex flex-wrap items-center gap-2">
-                <h1 class="text-xl font-bold text-cb-text sm:text-2xl leading-tight">{{ profile.displayName }}</h1>
+                <h1 class="text-md md:text-xl font-bold text-cb-text sm:text-2xl leading-tight">{{ profile.displayName }}</h1>
                 <span v-if="profile.identityVerificationBadge" class="inline-flex items-center gap-1 rounded-full bg-cb-accent/10 px-2.5 py-0.5 text-[10px] font-semibold text-cb-accent">
                   <i class="fa-solid fa-circle-check text-[8px]"></i> Verified
                 </span>
@@ -112,19 +112,19 @@
 
       <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div class="rounded-2xl border border-cb-divider bg-cb-card px-4 py-4 text-center">
-          <p class="text-xl font-bold text-cb-text">{{ profile.totalOrdersCompleted || 0 }}</p>
+          <p class="text-sm md:text-lg font-bold text-cb-text">{{ profile.totalOrdersCompleted || 0 }}</p>
           <p class="text-[11px] text-cb-muted">Orders</p>
         </div>
         <div class="rounded-2xl border border-cb-divider bg-cb-card px-4 py-4 text-center">
-          <p class="text-xl font-bold text-cb-text">{{ profile.averageRating || '0.0' }}</p>
+          <p class="text-sm md:text-lg font-bold text-cb-text">{{ profile.averageRating || '0.0' }}</p>
           <p class="text-[11px] text-cb-muted">Rating</p>
         </div>
         <div class="rounded-2xl border border-cb-divider bg-cb-card px-4 py-4 text-center">
-          <p class="text-xl font-bold text-cb-text">{{ profile.totalReviews || 0 }}</p>
+          <p class="text-sm md:text-lg font-bold text-cb-text">{{ profile.totalReviews || 0 }}</p>
           <p class="text-[11px] text-cb-muted">Reviews</p>
         </div>
         <div class="rounded-2xl border border-cb-divider bg-cb-card px-4 py-4 text-center">
-          <p class="text-xl font-bold text-cb-text truncate">{{ formatLastSeen }}</p>
+          <p class="text-sm md:text-lg font-bold text-cb-text truncate">{{ formatLastSeen }}</p>
           <p class="text-[11px] text-cb-muted">Last Active</p>
         </div>
       </div>
