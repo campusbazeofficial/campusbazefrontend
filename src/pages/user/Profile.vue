@@ -112,6 +112,26 @@
         <!-- Verification / completion CTAs — one per incomplete actionable step -->
         <div class="mt-4 space-y-2">
 
+          <!-- Location not set -->
+          <div
+            v-if="!(user.location?.state && user.location?.localGovt)"
+            class="flex items-center justify-between gap-3 rounded-xl border border-[var(--color-cb-warning)]/30 bg-[var(--color-cb-warning-subtle)] px-4 py-3"
+          >
+            <div class="flex items-center gap-2.5 min-w-0">
+              <i class="fa-solid fa-location-dot text-[var(--color-cb-warning)] text-sm shrink-0"></i>
+              <div class="min-w-0">
+                <p class="text-xs font-semibold text-[var(--color-cb-warning)]">Set your location</p>
+                <p class="text-[11px] text-[var(--color-cb-warning)]/80">Required to bid on errands in your area</p>
+              </div>
+            </div>
+            <button
+              @click="startEditPersonal"
+              class="shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-cb-warning)] px-3 py-1.5 text-xs font-bold text-white hover:opacity-90 transition-opacity"
+            >
+              Set <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </button>
+          </div>
+
           <!-- Phone not added at all -->
           <div
             v-if="!user.phone"
@@ -296,6 +316,53 @@
         </div>
       </div>
 
+      <!-- ══ LOCATION ══════════════════════════════ -->
+      <div class="rounded-2xl bg-[var(--color-cb-card)] p-5 flex flex-col gap-4">
+        <div class="flex items-center justify-between">
+          <h2 class="flex items-center gap-2 text-sm font-bold text-[var(--color-cb-text)]">
+            <i class="fa-solid fa-location-dot text-[var(--color-cb-accent)]"></i>
+            Location
+          </h2>
+          <button
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--color-cb-divider)] text-xs font-semibold text-[var(--color-cb-muted)] hover:border-[var(--color-cb-accent)] hover:text-[var(--color-cb-accent)] transition-colors"
+            @click="startEditPersonal"
+          >
+            <i class="fa-solid fa-pen"></i> Edit
+          </button>
+        </div>
+
+        <!-- No location set — prompt -->
+        <div v-if="!user.location?.state" class="flex items-center gap-3 rounded-xl border border-[var(--color-cb-warning)]/30 bg-[var(--color-cb-warning-subtle)] px-4 py-3">
+          <i class="fa-solid fa-triangle-exclamation text-[var(--color-cb-warning)] shrink-0"></i>
+          <div class="min-w-0">
+            <p class="text-xs font-semibold text-[var(--color-cb-warning)]">Location not set</p>
+            <p class="text-[11px] text-[var(--color-cb-warning)]/80 mt-0.5">You need a location to bid on errands in your area.</p>
+          </div>
+          <button
+            class="shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-cb-warning)] px-3 py-1.5 text-xs font-bold text-white hover:opacity-90 transition-opacity"
+            @click="startEditPersonal"
+          >
+            Set now <i class="fa-solid fa-arrow-right text-[10px]"></i>
+          </button>
+        </div>
+
+        <!-- Location values -->
+        <div v-else class="grid grid-cols-2 gap-4 sm:grid-cols-3">
+          <div>
+            <p class="text-[0.65rem] uppercase tracking-widest font-bold text-[var(--color-cb-muted)] mb-0.5">State</p>
+            <p class="text-sm text-[var(--color-cb-text)]">{{ user.location.state }}</p>
+          </div>
+          <div>
+            <p class="text-[0.65rem] uppercase tracking-widest font-bold text-[var(--color-cb-muted)] mb-0.5">Local Govt Area</p>
+            <p class="text-sm text-[var(--color-cb-text)]">{{ user.location.localGovt }}</p>
+          </div>
+          <div v-if="user.location.village">
+            <p class="text-[0.65rem] uppercase tracking-widest font-bold text-[var(--color-cb-muted)] mb-0.5">Village / Area</p>
+            <p class="text-sm text-[var(--color-cb-text)]">{{ user.location.village }}</p>
+          </div>
+        </div>
+      </div>
+
       <!-- ══ QUICK LINKS to extracted pages ════════ -->
       <!-- <div class="rounded-2xl bg-[var(--color-cb-card)] overflow-hidden divide-y divide-[var(--color-cb-divider)]">
         <router-link
@@ -408,6 +475,29 @@
                   <label class="text-xs font-semibold text-[var(--color-cb-text)]">Institution</label>
                   <input v-model="personalForm.institutionName" class="form-input" placeholder="e.g. University of Lagos" />
                 </div>
+
+                <!-- Location -->
+                <div class="pt-1">
+                  <p class="text-xs font-bold text-[var(--color-cb-text)] mb-3 flex items-center gap-1.5">
+                    <i class="fa-solid fa-location-dot text-[var(--color-cb-accent)] text-[10px]"></i>
+                    Location <span class="font-normal text-[var(--color-cb-muted)]">— required to bid on errands</span>
+                  </p>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-1.5">
+                      <label class="text-xs font-semibold text-[var(--color-cb-text)]">State <span class="text-[var(--color-cb-negative)]">*</span></label>
+                      <input v-model="personalForm.locationState" class="form-input" placeholder="e.g. Lagos" />
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                      <label class="text-xs font-semibold text-[var(--color-cb-text)]">Local Govt Area <span class="text-[var(--color-cb-negative)]">*</span></label>
+                      <input v-model="personalForm.locationLocalGovt" class="form-input" placeholder="e.g. Ikeja" />
+                    </div>
+                  </div>
+                  <div class="flex flex-col gap-1.5 mt-4">
+                    <label class="text-xs font-semibold text-[var(--color-cb-text)]">Village / Area <span class="text-[var(--color-cb-muted)] font-normal">(optional)</span></label>
+                    <input v-model="personalForm.locationVillage" class="form-input" placeholder="e.g. Allen" />
+                  </div>
+                </div>
+
                 <p v-if="saveError" class="text-xs text-[var(--color-cb-negative)] bg-[var(--color-cb-negative-subtle)] rounded-lg px-3 py-2">{{ saveError }}</p>
               </form>
             </div>
@@ -551,6 +641,7 @@ const completenessSteps = computed(() => {
     { label: 'Email verified',    done: !!user.value.isEmailVerified },
     { label: 'Phone added',       done: !!user.value.phone },
     { label: 'Phone verified',    done: !!user.value.isPhoneVerified },
+    { label: 'Location set',      done: !!(user.value.location?.state && user.value.location?.localGovt) },
     { label: 'Identity verified', done: user.value.identityVerificationStatus === 'verified' },
     { label: 'Bio added',         done: !!user.value.bio },
   ]
@@ -574,7 +665,18 @@ async function withOverlay(label, fn) { actionLabel.value = label; actionLoading
 
 // ── Edit profile ───────────────────────────────────────────────
 function startEditPersonal() {
-  personalForm.value = { firstName: user.value.firstName, lastName: user.value.lastName, displayName: user.value.displayName, phone: user.value.phone || '', bio: user.value.bio || '', institutionName: user.value.institutionName || '' }
+  const loc = user.value.location || {}
+  personalForm.value = {
+    firstName: user.value.firstName,
+    lastName: user.value.lastName,
+    displayName: user.value.displayName,
+    phone: user.value.phone || '',
+    bio: user.value.bio || '',
+    institutionName: user.value.institutionName || '',
+    locationState: loc.state || '',
+    locationLocalGovt: loc.localGovt || '',
+    locationVillage: loc.village || '',
+  }
   saveError.value = ''; generatedBio.value = ''; editProfileModalOpen.value = true
 }
 function closeEditModal() { if (actionLoading.value) return; editProfileModalOpen.value = false; saveError.value = '' }
@@ -583,9 +685,18 @@ async function savePersonal() {
   saveError.value = ''
   await withOverlay('Saving profile...', async () => {
     try {
-      if (isCorporate.value) await userStore.updateCorporateMe(personalForm.value)
-      else await userStore.updateMe(personalForm.value)
-      if (userStore.profile?.user) { Object.assign(userStore.profile.user, personalForm.value); localStorage.setItem('user', JSON.stringify(userStore.profile.user)) }
+      const { locationState, locationLocalGovt, locationVillage, ...rest } = personalForm.value
+      const payload = {
+        ...rest,
+        location: {
+          state: locationState.trim(),
+          localGovt: locationLocalGovt.trim(),
+          ...(locationVillage.trim() && { village: locationVillage.trim() }),
+        },
+      }
+      if (isCorporate.value) await userStore.updateCorporateMe(payload)
+      else await userStore.updateMe(payload)
+      if (userStore.profile?.user) { Object.assign(userStore.profile.user, payload); localStorage.setItem('user', JSON.stringify(userStore.profile.user)) }
       editProfileModalOpen.value = false
       showToast('success', 'Profile updated successfully')
     } catch (e) { saveError.value = e.response?.data?.message || 'Failed to save changes' }

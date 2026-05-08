@@ -4,10 +4,13 @@ import { ref, computed } from 'vue'
 export const PAGE_LIMIT = 9
 
 const DEFAULT_FILTERS = () => ({
-  search:     '',
-  category:   '',
-  budgetType: '',
-  sort:       'newest',
+  search:          '',
+  category:        '',
+  budgetType:      '',
+  sort:            'newest',
+  locationState:   '',
+  locationLocalGovt: '',
+  locationVillage: '',
 })
 
 const DEFAULT_PRICE_RANGE = () => ({ min: 0, max: null })
@@ -26,7 +29,8 @@ export function useErrandFilters() {
 
   const hasActiveFilters = computed(() =>
     !!(filters.value.search || filters.value.category ||
-       filters.value.budgetType || hasPriceRange.value)
+       filters.value.budgetType || hasPriceRange.value ||
+       filters.value.locationState || filters.value.locationLocalGovt || filters.value.locationVillage)
   )
 
   // ── Param builder ─────────────────────────────────────────
@@ -35,10 +39,13 @@ export function useErrandFilters() {
   function buildParams() {
     const p = { page: currentPage.value, limit: PAGE_LIMIT }
 
-    if (filters.value.sort)           p.sort       = filters.value.sort
-    if (filters.value.search.trim())  p.search     = filters.value.search.trim()
-    if (filters.value.category)       p.category   = filters.value.category
-    if (filters.value.budgetType)     p.budgetType = filters.value.budgetType
+    if (filters.value.sort)                p.sort       = filters.value.sort
+    if (filters.value.search.trim())       p.search     = filters.value.search.trim()
+    if (filters.value.category)            p.category   = filters.value.category
+    if (filters.value.budgetType)          p.budgetType = filters.value.budgetType
+    if (filters.value.locationState)       p.state      = filters.value.locationState.trim()
+    if (filters.value.locationLocalGovt)   p.localGovt  = filters.value.locationLocalGovt.trim()
+    if (filters.value.locationVillage)     p.village    = filters.value.locationVillage.trim()
 
     if (priceRange.value.min > 0)                   p.minBudget = priceRange.value.min
     if (priceRange.value.max !== null &&

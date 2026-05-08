@@ -1,51 +1,96 @@
 <template>
-  <footer class="bg-cb-card ">
+  <footer class="bg-cb-card">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
       <!-- Main Grid -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-10">
-
         <!-- Brand Column -->
         <div class="sm:col-span-2 lg:col-span-1 flex flex-col gap-4">
-          <router-link to="/" class="inline-flex items-center  w-fit">
-           <!-- <img src="@/assets/img/campusBaseLogo.png" alt="CampusBase Logo" class=" h-8 w-auto object-contain" /> -->
-           
-             <img
-          :src="currentLogo"
-          alt="CampusBase Logo"
-          class="h-8 w-auto object-contain"
-        />
-            
+          <router-link to="/" class="inline-flex items-center w-fit">
+            <!-- <img src="@/assets/img/campusBaseLogo.png" alt="CampusBase Logo" class=" h-8 w-auto object-contain" /> -->
+
+            <img
+              :src="currentLogo"
+              alt="CampusBase Logo"
+              class="h-8 w-auto object-contain"
+            />
           </router-link>
           <p class="text-cb-muted text-sm leading-relaxed">
-            Connecting students with opportunities. Your gateway to campus life and professional growth.
+            Connecting students with opportunities. Your gateway to campus life
+            and professional growth.
           </p>
           <div class="flex items-center gap-2 mt-1">
-            <a href="https://www.facebook.com/share/p/1AbVjoP32M/" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="Facebook">
+            <a
+              href="https://www.facebook.com/61555774271352/posts/122111110616192475/?app=fbl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="social-icon"
+              aria-label="Facebook"
+            >
               <i class="fa-brands fa-facebook-f text-sm"></i>
             </a>
-            <a href="https://x.com/i/status/2043723306931474875" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="Twitter">
+            <a
+              href="https://x.com/i/status/2043001280365310172"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="social-icon"
+              aria-label="Twitter"
+            >
               <i class="fa-brands fa-x-twitter text-sm"></i>
             </a>
-            <a href="https://www.instagram.com/p/DXE_Vo3DSFm/" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="Instagram">
+            <a
+              href="https://www.instagram.com/campus_baze?igsh=MXFrNm1vMHR4c2I5Zg=="
+              target="_blank"
+              rel="noopener noreferrer"
+              class="social-icon"
+              aria-label="Instagram"
+            >
               <i class="fa-brands fa-instagram text-sm"></i>
             </a>
-            <a href="https://www.linkedin.com/posts/campus-baze_campusbaze-knowyourworth-skillbasedincome-activity-7449489345360592897-EX8o?utm_source=share&utm_medium=member_android&rcm=ACoAAGBTErIBcUEPCEFQSFpiyZ3vqGiO2uR_H1g" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="LinkedIn">
-              <i class="fa-brands fa-linkedin-in text-sm"></i>
+            <a
+              href="https://t.me/campusbazers1"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="social-icon"
+              aria-label="Telegram"
+            >
+              <i class="fa-brands fa-telegram text-sm"></i>
+            </a>
+            <a
+              href="https://www.tiktok.com/@campusbaze?_r=1&_t=ZS-96AUORqfjuu"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="social-icon"
+              aria-label="TikTok"
+            >
+              <i class="fa-brands fa-tiktok text-sm"></i>
             </a>
           </div>
         </div>
 
         <!-- Quick Links -->
         <div class="flex flex-col gap-4">
-          <h3 class="text-xs text-cb-text uppercase tracking-widest">Quick Links</h3>
+          <h3 class="text-xs text-cb-text uppercase tracking-widest">
+            Quick Links
+          </h3>
           <nav class="flex flex-col gap-2.5">
             <router-link to="/" class="footer-link">Home</router-link>
-            <a href="/#how-it-works" class="footer-link" @click.prevent="scrollTo('how-it-works')">How it Works</a>
+            <a
+              href="/#how-it-works"
+              class="footer-link"
+              @click.prevent="scrollTo('how-it-works')"
+              >How it Works</a
+            >
             <router-link to="/about" class="footer-link">About Us</router-link>
             <router-link to="/about" class="footer-link">About Us</router-link>
-             <router-link to="/subscription" class="footer-link">Subscription Plans</router-link>
-            <a href="/#faq" class="footer-link" @click.prevent="scrollTo('faq')">FAQ</a>
-            <router-link to="/contact" class="footer-link">Contact Us</router-link>
+            <router-link to="/subscription" class="footer-link"
+              >Subscription Plans</router-link
+            >
+            <a href="/#faq" class="footer-link" @click.prevent="scrollTo('faq')"
+              >FAQ</a
+            >
+            <router-link to="/contact" class="footer-link"
+              >Contact Us</router-link
+            >
           </nav>
         </div>
 
@@ -53,18 +98,28 @@
         <div class="flex flex-col gap-4">
           <h3 class="text-xs text-cb-text uppercase tracking-widest">Legal</h3>
           <nav class="flex flex-col gap-2.5">
-            <router-link to="/privacy-policy" class="footer-link">Privacy Policy</router-link>
-            <router-link to="/terms-of-service" class="footer-link">Terms of Service</router-link>
-            <router-link to="/cookie-policy" class="footer-link">Cookie Policy</router-link>
-            <router-link to="/disclaimer" class="footer-link">Disclaimer</router-link>
+            <router-link to="/privacy-policy" class="footer-link"
+              >Privacy Policy</router-link
+            >
+            <router-link to="/terms-of-service" class="footer-link"
+              >Terms of Service</router-link
+            >
+            <router-link to="/cookie-policy" class="footer-link"
+              >Cookie Policy</router-link
+            >
+            <router-link to="/disclaimer" class="footer-link"
+              >Disclaimer</router-link
+            >
           </nav>
         </div>
 
         <!-- CTA Column -->
         <div class="flex flex-col gap-4">
-          <h3 class="text-xs text-cb-text uppercase tracking-widest">Get Early Access</h3>
+          <h3 class="text-xs text-cb-text uppercase tracking-widest">
+            Get Early Access
+          </h3>
           <p class="text-cb-muted text-sm leading-relaxed">
-            Be the first to know when we launch. Join our WhatsApp waitlist.
+            Get real-time support and updates. Join our WhatsApp group today.
           </p>
           <a
             href="https://chat.whatsapp.com/HdwfFSzVQu69DAH8UPweJT?mode=hqctcla"
@@ -74,7 +129,7 @@
             aria-label="Join waitlist on WhatsApp"
           >
             <i class="fa-brands fa-whatsapp text-base"></i>
-            Join Waitlist
+            Join Group
           </a>
         </div>
       </div>
@@ -83,9 +138,11 @@
       <div class="h-px bg-cb-divider"></div>
 
       <!-- Bottom Bar -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-6">
+      <div
+        class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-6"
+      >
         <p class="text-sm text-cb-muted">
-          &copy; {{ currentYear }} CampusBaze. All rights reserved.
+          &copy; {{ currentYear }} Campus Baze. All rights reserved.
         </p>
       </div>
     </div>
@@ -93,8 +150,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { ref, computed } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { useTheme } from "@/composables/Usetheme"; // ✅ ADD
 
 import logoLight from "@/assets/img/campusBaseLogo-light.png";
@@ -103,20 +160,20 @@ import logoDark from "@/assets/img/campusBaseLogo-dark.png";
 const { theme } = useTheme(); // ✅ ADD
 
 const currentLogo = computed(() =>
-   theme.value === "dark" ? logoLight  : logoDark,
+  theme.value === "dark" ? logoLight : logoDark,
 );
 
-const currentYear = ref(new Date().getFullYear())
-const router = useRouter()
-const route = useRoute()
+const currentYear = ref(new Date().getFullYear());
+const router = useRouter();
+const route = useRoute();
 
 async function scrollTo(id) {
-  if (route.path !== '/') {
-    await router.push('/')
-    await new Promise(resolve => setTimeout(resolve, 100))
+  if (route.path !== "/") {
+    await router.push("/");
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
-  const el = document.getElementById(id)
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 </script>
 

@@ -2,7 +2,7 @@
   <LegalLayout
     label="Legal"
     title="Terms of Service"
-    lastUpdated="April 2025"
+    lastUpdated="March 2026"
     :sections="sections"
     :contact="contact"
   />
@@ -12,8 +12,8 @@
 import LegalLayout from './LegalLayout.vue'
 
 const contact = {
-  text: 'For questions, support requests, or complaints regarding these Terms, please contact our support team.',
-  email: 'support@campusbaze.com',
+  text: 'For questions, support requests, or complaints regarding these Terms, please contact:',
+  email: 'campusbazeofficial@gmail.com',
 }
 
 const sections = [
@@ -26,7 +26,7 @@ const sections = [
       'Connect with students and members of campus ecosystems',
       'Complete tasks and receive payment through the platform',
     ],
-    body: 'CampusBaze operates strictly as a facilitator and transaction platform. CampusBaze does not directly provide or perform any services listed on the platform and is not a party to service agreements made between users.',
+    body: 'CampusBaze operates strictly as a facilitator and transaction platform that enables service agreements between users. CampusBaze does not directly provide or perform any services listed on the platform and is not a party to service agreements made between users.',
   },
   {
     heading: 'Eligibility',
@@ -36,7 +36,7 @@ const sections = [
       'Provide accurate and complete registration information',
       'Agree to comply with all CampusBaze policies, rules, and community guidelines',
     ],
-    body: 'CampusBaze is primarily designed for campus ecosystems, but participation is not limited to students. Non-students may join to request or provide services within campus communities. CampusBaze reserves the right to approve, reject, suspend, or terminate accounts at its sole discretion.',
+    body: 'CampusBaze is primarily designed for campus ecosystems, but participation is not limited to students. Non-students may join the platform to request or provide services within campus communities. CampusBaze reserves the right to approve, reject, suspend, or terminate accounts at its sole discretion.',
   },
   {
     heading: 'User Accounts',
@@ -46,7 +46,7 @@ const sections = [
       'Maintain the confidentiality of your account credentials',
       'Accept full responsibility for all activities conducted through your account',
     ],
-    body: 'Users are responsible for safeguarding their login details. CampusBaze will not be liable for losses resulting from unauthorized access to your account.',
+    body: 'Users are responsible for safeguarding their login details. CampusBaze will not be liable for losses resulting from unauthorized access caused by a failure to protect account credentials.',
   },
   {
     heading: 'Services and Transactions',
@@ -54,23 +54,29 @@ const sections = [
     subsections: [
       {
         title: 'Service providers are responsible for:',
-        bullets: ['Delivering the service as described', 'Completing tasks within the agreed timeframe'],
+        bullets: [
+          'Delivering the service as described',
+          'Completing tasks within the agreed timeframe',
+        ],
       },
       {
         title: 'Clients are responsible for:',
-        bullets: ['Providing accurate job descriptions', 'Cooperating during the execution of the service'],
+        bullets: [
+          'Providing accurate job descriptions',
+          'Cooperating during the execution of the service',
+        ],
       },
     ],
     body: 'CampusBaze does not guarantee the performance, quality, or outcome of any service.',
   },
   {
     heading: 'Payments and Fund Holding',
-    intro: 'All payments for services conducted through CampusBaze must be processed through the platform. Payments made outside the platform may constitute a violation of platform policies.',
-    body: 'When a client pays for a service, funds may be temporarily held by CampusBaze and released to the service provider once the client confirms successful service completion. CampusBaze reserves the right to delay or withhold payment release under circumstances including: pending service confirmation, disputes between users, suspicious or fraudulent activity, or violations of platform policies.',
+    intro: 'All payments for services conducted through CampusBaze must be processed through the platform. Payments made outside the platform are strongly discouraged and may constitute a violation of platform policies.',
+    body: 'When a client pays for a service, funds may be temporarily held by CampusBaze and released to the service provider once the client confirms successful service completion. CampusBaze reserves the right to delay or withhold payment release under circumstances including: pending service confirmation, disputes between users, suspicious or fraudulent activity, or violations of platform policies. This system exists to ensure trust, transparency, and accountability for all parties involved.',
   },
   {
     heading: 'Disputes',
-    body: 'If a client believes a service has not been delivered as agreed, they may initiate a dispute through CampusBaze support. CampusBaze may review the dispute based on evidence provided by both parties, communication records, and the original service agreement. CampusBaze reserves the right to delay payment release, issue partial or full refunds, or apply warnings to users who violate agreements. Decisions made by CampusBaze regarding dispute resolution are final within the platform.',
+    body: 'If a client believes a service has not been delivered as agreed, they may initiate a dispute through CampusBaze support. CampusBaze may review the dispute and make a determination based on evidence provided by both parties, communication records on the platform, and the original service agreement. CampusBaze reserves the right to delay payment release, issue partial or full refunds, or apply warnings or penalties to users who violate agreements. Decisions made by CampusBaze regarding dispute resolution are final within the platform.',
   },
   {
     heading: 'Prohibited Activities',
@@ -95,7 +101,7 @@ const sections = [
   },
   {
     heading: 'Platform Availability',
-    body: 'CampusBaze strives to maintain continuous platform access. However, uninterrupted availability cannot be guaranteed. Temporary interruptions may occur due to maintenance, technical issues, or security updates. CampusBaze will not be liable for losses resulting from temporary downtime or service interruptions.',
+    body: 'CampusBaze strives to maintain continuous platform access. However, uninterrupted availability cannot be guaranteed. Temporary interruptions may occur due to maintenance updates, technical issues, security updates, or system improvements. CampusBaze will not be liable for losses or damages resulting from temporary downtime or service interruptions.',
   },
   {
     heading: 'Account Suspension or Termination',

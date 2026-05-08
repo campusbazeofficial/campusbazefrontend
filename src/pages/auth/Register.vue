@@ -95,6 +95,29 @@
           />
         </template>
 
+        <div class="section-divider"><span>Location</span></div>
+        <div class="two-col">
+          <AuthInput
+            v-model="form.locationState"
+            label="State"
+            placeholder="e.g. Lagos"
+            :error="errors.locationState"
+            @blur="validateField('locationState')"
+          />
+          <AuthInput
+            v-model="form.locationLocalGovt"
+            label="Local Govt Area"
+            placeholder="e.g. Ikeja"
+            :error="errors.locationLocalGovt"
+            @blur="validateField('locationLocalGovt')"
+          />
+        </div>
+        <AuthInput
+          v-model="form.locationVillage"
+          label="Village / Area (optional)"
+          placeholder="e.g. Allen"
+        />
+
         <p v-if="errors.general" class="error-banner">{{ errors.general }}</p>
         <button type="submit" class="auth-btn" :disabled="!step1Valid">Save & Continue</button>
         <p class="auth-switch">
@@ -155,7 +178,11 @@
           </div>
           <div class="two-col">
             <AuthInput v-model="form.country" label="Country" placeholder="Nigeria" />
-            <AuthInput v-model="form.state" label="State" placeholder="e.g. Lagos" />
+            <AuthInput v-model="form.locationState" label="State" placeholder="e.g. Lagos" :error="errors.locationState" @blur="validateField('locationState')" />
+          </div>
+          <div class="two-col">
+            <AuthInput v-model="form.locationLocalGovt" label="Local Govt Area" placeholder="e.g. Ikeja" :error="errors.locationLocalGovt" @blur="validateField('locationLocalGovt')" />
+            <AuthInput v-model="form.locationVillage" label="Village / Area (optional)" placeholder="e.g. Allen" />
           </div>
           <div class="section-divider"><span>Security</span></div>
           <AuthInput
@@ -251,6 +278,9 @@ const form = ref({
   website: '',
   country: 'Nigeria',
   state: '',
+  locationState: '',
+  locationLocalGovt: '',
+  locationVillage: '',
 })
 // referralCode is a plain optional field — no live validation, just submitted with the form
 
@@ -309,6 +339,12 @@ function validateField(field) {
     else if (!/^RC?\d{5,10}$/i.test(v.rcNumber.trim())) e.rcNumber = 'Enter a valid RC number (e.g. RC1234567)'
     else e.rcNumber = ''
   }
+  if (field === 'locationState') {
+    e.locationState = v.locationState.trim() ? '' : 'State is required'
+  }
+  if (field === 'locationLocalGovt') {
+    e.locationLocalGovt = v.locationLocalGovt.trim() ? '' : 'Local Government Area is required'
+  }
   if (field === 'website') {
     if (!v.website.trim()) { e.website = ''; return }
     if (!v.website.trim().startsWith('https://')) {
@@ -350,12 +386,13 @@ function strengthClass(bar) {
 // ── Step validity (drives disabled states) ──
 const step1Valid = computed(() => {
   const v = form.value
-  const noErrors = !['firstName','lastName','email','phone','institutionName'].some(f => errors.value[f])
+  const noErrors = !['firstName','lastName','email','phone','institutionName','locationState','locationLocalGovt'].some(f => errors.value[f])
   const hasBasic = v.firstName.trim().length >= 2 && v.lastName.trim().length >= 2
     && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.email.trim())
     && /^\+?[0-9]{7,15}$/.test(v.phone.replace(/\s/g, ''))
   const hasStudent = accountType.value !== 'individual' || !v.isStudent || v.institutionName.trim().length > 0
-  return hasBasic && hasStudent && noErrors
+  const hasLocation = v.locationState.trim().length > 0 && v.locationLocalGovt.trim().length > 0
+  return hasBasic && hasStudent && hasLocation && noErrors
 })
 
 const step2Valid = computed(() => {
@@ -369,6 +406,8 @@ const step2Valid = computed(() => {
       && v.companyName.trim().length > 0
       && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.companyEmail.trim())
       && /^RC?\d{5,10}$/i.test(v.rcNumber.trim())
+      && v.locationState.trim().length > 0
+      && v.locationLocalGovt.trim().length > 0
   }
   return passOk && termsOk
 })
@@ -376,9 +415,9 @@ const step2Valid = computed(() => {
 // ── Step 1 submit ──
 function goStep2() {
   errors.value = {}
-  ;['firstName', 'lastName', 'email', 'phone'].forEach(validateField)
+  ;['firstName', 'lastName', 'email', 'phone', 'locationState', 'locationLocalGovt'].forEach(validateField)
   if (accountType.value === 'individual' && form.value.isStudent) validateField('institutionName')
-  const hasErrors = ['firstName', 'lastName', 'email', 'phone', 'institutionName'].some(f => errors.value[f])
+  const hasErrors = ['firstName', 'lastName', 'email', 'phone', 'institutionName', 'locationState', 'locationLocalGovt'].some(f => errors.value[f])
   if (!hasErrors) step.value = 2
 }
 
@@ -406,6 +445,11 @@ async function handleRegister() {
         isStudent: form.value.isStudent,
         institutionName: form.value.isStudent ? form.value.institutionName.trim() : undefined,
         referralCode: form.value.referralCode.trim() || undefined,
+        location: {
+          state: form.value.locationState.trim(),
+          localGovt: form.value.locationLocalGovt.trim(),
+          ...(form.value.locationVillage.trim() && { village: form.value.locationVillage.trim() }),
+        },
       })
     } else {
       await authStore.registerCorporate({
@@ -421,8 +465,12 @@ async function handleRegister() {
         industry: form.value.industry.trim() || undefined,
         website: form.value.website.trim() || undefined,
         country: form.value.country.trim() || 'Nigeria',
-        state: form.value.state.trim() || undefined,
         referralCode: form.value.referralCode.trim() || undefined,
+        location: {
+          state: form.value.locationState.trim(),
+          localGovt: form.value.locationLocalGovt.trim(),
+          ...(form.value.locationVillage.trim() && { village: form.value.locationVillage.trim() }),
+        },
       })
     }
     router.push({ path: '/auth/verify-email', query: { email: form.value.email.trim().toLowerCase() } })

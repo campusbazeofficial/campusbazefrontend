@@ -33,7 +33,7 @@
 
       <!-- Empty state -->
       <MarketEmptyState
-        v-else-if="!errandStore.market.length"
+        v-else-if="!filteredMarket.length"
         :has-active-filters="hasActiveFilters"
         @clear="clearFilters"
         @navigate="router.push({ name: 'PostErrand' })"
@@ -44,7 +44,7 @@
       <template v-else>
         <div :class="gridClass">
           <ErrandCard
-            v-for="errand in errandStore.market"
+            v-for="errand in filteredMarket"
             :key="errand._id"
             :errand="errand"
             :view-mode="viewMode"
@@ -77,6 +77,7 @@
             :errand="bidModal.errand"
             :loading="errandStore.actionLoading"
             :error="bidError"
+            :user-has-location="userHasLocation"
             @submit="handleBid"
             @close="bidModal.open = false"
           />
@@ -135,16 +136,25 @@ const {
 
 // ── Stats ─────────────────────────────────────────────────────
 const marketMeta = computed(() => errandStore.marketMeta);
+
+// Client-side safety net: if the API doesn't honour budgetType filtering,
+// this ensures what the user sees always matches the selected filter.
+const filteredMarket = computed(() => {
+  const list = errandStore.market;
+  if (!filters.value.budgetType) return list;
+  return list.filter(e => e.budgetType === filters.value.budgetType);
+});
+
 const totalCount = computed(
-  () => marketMeta.value?.total ?? errandStore.market.length,
+  () => filteredMarket.value.length ?? 0,
 );
 const avgBudget = computed(() => {
-  const list = errandStore.market;
+  const list = filteredMarket.value;
   if (!list.length) return null;
   return Math.round(list.reduce((s, e) => s + (e.budget || 0), 0) / list.length);
 });
 const urgentCount = computed(
-  () => errandStore.market.filter((e) => isUrgent(e.deadline)).length,
+  () => filteredMarket.value.filter((e) => isUrgent(e.deadline)).length,
 );
 
 // ── Core fetch ────────────────────────────────────────────────
@@ -179,6 +189,12 @@ function openDetail(errand) {
 
 const isPoster = (errand) => errandStore.isPoster(errand._id);
 
+// Whether the logged-in runner has a location set (required to bid)
+const userHasLocation = computed(() => {
+  const loc = userStore.user?.location;
+  return !!(loc?.state && loc?.localGovt);
+});
+
 // ── Bid modal (quick-bid from card) ───────────────────────────
 const bidModal = ref({ open: false, errand: null });
 const bidError = ref("");
@@ -195,8 +211,14 @@ async function handleBid({ amount, message }) {
     bidModal.value.open = false;
     toast.success("Bid placed successfully");
     fetchErrands();
-  } catch {
-    bidError.value = errandStore.error || "Failed to place bid";
+  } catch (err) {
+    const status = err?.response?.status;
+    const msg = err?.response?.data?.message || "";
+    if (status === 403 && msg.toLowerCase().includes("local government")) {
+      bidError.value = "You can only bid on errands in your local government area.";
+    } else {
+      bidError.value = errandStore.error || "Failed to place bid";
+    }
   }
 }
 

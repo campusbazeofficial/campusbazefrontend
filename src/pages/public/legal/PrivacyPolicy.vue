@@ -2,7 +2,7 @@
   <LegalLayout
     label="Legal"
     title="Privacy Policy"
-    lastUpdated="April 2025"
+    lastUpdated="March 2026"
     :sections="sections"
     :contact="contact"
   />
@@ -13,28 +13,45 @@ import LegalLayout from './LegalLayout.vue'
 
 const contact = {
   text: 'For questions or requests regarding your personal data, reach out to our support team.',
-  email: 'support@campusbaze.com',
+  email: 'campusbazeofficial@gmail.com',
 }
 
 const sections = [
   {
     heading: 'Information We Collect',
-    intro: 'CampusBaze collects information in order to operate the platform effectively. This includes:',
+    intro: 'CampusBaze may collect several types of information in order to operate the platform effectively.',
     subsections: [
       {
         title: 'Personal Information',
-        text: 'Information provided during account registration:',
-        bullets: ['Name', 'Email address', 'Phone number', 'Profile photo', 'Campus affiliation (where applicable)'],
+        text: 'This includes information provided during account registration such as:',
+        bullets: [
+          'Name',
+          'Email address',
+          'Phone number',
+          'Profile photo',
+          'Campus affiliation (where applicable)',
+        ],
       },
       {
         title: 'Transaction Information',
-        text: 'When users interact on the platform:',
-        bullets: ['Service requests or job postings', 'Payment details', 'Transaction history', 'Communication between users within the platform'],
+        text: 'When users interact on the platform, CampusBaze may collect information including:',
+        bullets: [
+          'Service requests or job postings',
+          'Payment details',
+          'Transaction history',
+          'Communication between users within the platform',
+        ],
       },
       {
         title: 'Device and Technical Information',
-        text: 'To improve performance and security:',
-        bullets: ['IP address', 'Device type and browser type', 'Operating system', 'Usage activity on the platform'],
+        text: 'To improve platform performance and security, CampusBaze may collect:',
+        bullets: [
+          'IP address',
+          'Device type',
+          'Browser type',
+          'Operating system',
+          'Usage activity on the platform',
+        ],
       },
     ],
   },
@@ -62,7 +79,7 @@ const sections = [
   },
   {
     heading: 'Data Protection',
-    body: 'CampusBaze implements reasonable technical and security measures to protect user data from unauthorized access. However, no digital platform can guarantee absolute security. Users are encouraged to take precautions to protect their accounts and login credentials.',
+    body: 'CampusBaze implements reasonable technical and security measures to protect user data from unauthorized access. However, no digital platform can guarantee absolute security. Users are encouraged to take precautions to protect their account.',
   },
   {
     heading: 'User Rights',

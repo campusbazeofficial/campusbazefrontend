@@ -93,7 +93,7 @@ const testimonials = [
     avatar: 'https://i.pravatar.cc/150?img=11',
     rating: '5.0',
     date: '3 Feb, 2025',
-    quote: 'I started offering my graphic design skills on CampusBaze and within two weeks I had made enough to cover my feeding for the month. This platform is a total game changer for students.',
+    quote: 'I started offering my graphic design skills on Campus Baze and within two weeks I had made enough to cover my feeding for the month. This platform is a total game changer for students.',
   },
   {
     id: 3,

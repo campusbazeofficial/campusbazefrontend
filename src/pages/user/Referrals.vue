@@ -254,24 +254,24 @@ async function copyLink() {
 }
 
 function shareWhatsApp() {
-  const text = encodeURIComponent(`Join me on CampusBaze! Sign up with my referral link: ${referralLink.value}`)
+  const text = encodeURIComponent(`Join me on Campus Baze! Sign up with my referral link: ${referralLink.value}`)
   window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener')
 }
 
 function shareTwitter() {
-  const text = encodeURIComponent(`Join me on CampusBaze 🎓 Sign up with my link and let's get things done together:\n${referralLink.value}`)
+  const text = encodeURIComponent(`Join me on Campus Baze 🎓 Sign up with my link and let's get things done together:\n${referralLink.value}`)
   window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank', 'noopener')
 }
 
 function shareTelegram() {
-  const text = encodeURIComponent(`Join CampusBaze with my referral link: ${referralLink.value}`)
+  const text = encodeURIComponent(`Join Campus Baze with my referral link: ${referralLink.value}`)
   window.open(`https://t.me/share/url?url=${encodeURIComponent(referralLink.value)}&text=${text}`, '_blank', 'noopener')
 }
 
 async function nativeShare() {
   try {
     await navigator.share({
-      title: 'Join me on CampusBaze',
+      title: 'Join me on Campus Baze',
       text: 'Sign up using my referral link!',
       url: referralLink.value,
     })

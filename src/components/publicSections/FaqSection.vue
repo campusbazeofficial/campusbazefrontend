@@ -9,7 +9,7 @@
         <p class="section-label">FAQ</p>
         <h2 class="section-title">Frequently asked questions</h2>
         <p class="section-sub">
-          Everything you need to know about CampusBaze. Can't find what you're
+          Everything you need to know about Campus Baze. Can't find what you're
           looking for? Feel free to reach out to us.
         </p>
       </div>
@@ -114,49 +114,61 @@ const faqs = [
     id: 1,
     question: "What is CampusBaze?",
     answer:
-      "CampusBaze is a campus-focused platform that connects students who need errands done with students who have the skills and time to do them. It's a trusted marketplace built exclusively for university communities.",
+      "CampusBaze is a campus-based marketplace where students and people within the university community can offer services, discover talent, and earn money by solving everyday needs on campus.",
   },
   {
     id: 2,
     question: "Who can use CampusBaze?",
     answer:
-      "CampusBaze is available to students and staff of partner universities. You must verify your identity using a valid university email address to access the platform.",
+      "Students, skilled individuals within the campus community, and anyone who needs services from students can use CampusBaze.",
   },
   {
     id: 3,
-    question: "How do I post an errand?",
+    question: "What kind of services can I offer on CampusBaze?",
     answer:
-      "Simply sign up, go to the Post Errand page, describe what you need done, set your budget, and submit. You'll start receiving offers from nearby students right away.",
+      "You can offer any legitimate service such as graphic design, typing, hair styling, laundry, photography, delivery errands, tech support, tutoring, and many others.",
   },
   {
     id: 4,
-    question: "How do I earn on CampusBaze?",
+    question: "How do I start offering my services on CampusBaze?",
     answer:
-      "You can earn by listing a service you offer or by browsing and accepting errands posted by other students. Once a task is completed and confirmed, your earnings are paid out directly through the platform.",
+      "Create an account, set up your profile, list the services you offer, and start receiving requests from people who need those services.",
   },
   {
     id: 5,
-    question: "Is my payment secure?",
+    question: "How do clients find service providers on CampusBaze?",
     answer:
-      "Yes. CampusBaze uses an escrow-style payment system. Funds are held securely until the task is completed and confirmed by both parties, ensuring neither side is at risk.",
+      "Clients can browse through service listings, view profiles, check reviews, and choose the provider that best fits their needs.",
   },
   {
     id: 6,
-    question: "What happens if there is a dispute?",
+    question: "How are payments handled on CampusBaze?",
     answer:
-      "CampusBaze has a dedicated dispute resolution process. If an issue arises between a poster and an earner, our support team will step in to review the situation and mediate a fair outcome.",
+      "Payments are made through the CampusBaze platform and held temporarily until the client confirms that the service has been successfully delivered.",
   },
   {
     id: 7,
-    question: "Are user profiles verified?",
+    question: "Does CampusBaze charge a commission?",
     answer:
-      "Yes. Every user is verified through their university email before they can post or accept tasks. Ratings and reviews are also collected after each completed task to help maintain community trust.",
+      "Yes. CampusBaze charges a commission between 15% and 30% depending on the service category.",
   },
   {
     id: 8,
-    question: "Is CampusBaze available on mobile?",
+    question: "What happens if there is a dispute between a client and a service provider?",
     answer:
-      "CampusBaze works fully on mobile browsers. A dedicated mobile app is currently in development and will be available soon for both Android and iOS.",
+      "CampusBaze reviews the situation and resolves disputes before releasing the payment to ensure fairness for both parties.",
+  },
+  {
+    id: 9,
+    question: "Can non-students hire services on CampusBaze?",
+    answer:
+      "Yes. People outside the university can also hire talented students through the platform.",
+  },
+  {
+    id: 10,
+    question: "How do I get more clients on CampusBaze?",
+    answer:
+      "Complete your profile, upload examples of your work, respond quickly to requests, deliver quality service, and maintain positive reviews from clients.",
   },
 ];
 

@@ -6,7 +6,7 @@
         <!-- Left: Image -->
         <div class="image-wrapper order-1 lg:order-1">
           <img
-            src="@/assets/img/heroImg-2.jpg"
+            src="@/assets/img/publicImages/we_fit_your_needs.jpeg"
             alt="Students collaborating on campus"
             class="section-image"
           />
@@ -25,7 +25,7 @@
           <div class="quote-block">
             <p class="quote-text">
               Whether you need something done quickly or you're looking to earn by offering
-              your skills, CampusBaze brings the right people together. Post errands, find
+              your skills, Campus Baze brings the right people together. Post errands, find
               trusted help within your campus community, or turn your abilities into
               income all in one place.
             </p>

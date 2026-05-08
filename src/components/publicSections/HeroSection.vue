@@ -6,12 +6,12 @@
         <!-- Left: Text Content -->
         <div class="flex flex-col gap-6 order-2 lg:order-1">
           <h1 class="hero-headline">
-            <span class="text-cb-accent">Find Work.</span> Offer Help. 
-             <span class="text-cb-accent">Earn Money.</span>
+            Hire the most <span class="text-cb-accent">skilled talents</span> on campuses.
           </h1>
 
           <p class="hero-subtext">
-           We help students showcase their skills, run errands, and connect with clients who need them.
+            We connect individuals, entrepreneurs, with campus talents who can offer services and run errands.
+            From services like Designs, writing, coding to errands like painting, plumbing, delivery, Campus Baze is the right marketplace.
           </p>
 
           <div class="flex flex-wrap gap-3 mt-2">
@@ -27,31 +27,28 @@
         <!-- Right: Image Grid -->
         <div class="relative hidden sm:flex gap-4 h-[420px] lg:h-[480px] order-1 lg:order-2">
           <!-- Tall left image -->
-          <div class="w-[58%] rounded-2xl overflow-hidden">
-            <img
-              src="@/assets/img/heroImg-1.jpg"
-              alt="Students collaborating on campus"
-              class="w-full h-full object-cover"
-            />
-          </div>
+          <div
+            class="w-[58%] rounded-2xl"
+            :style="{ backgroundImage: `url(${heroImg1})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }"
+            role="img"
+            aria-label="Students collaborating on campus"
+          ></div>
           <!-- Shorter right image — offset down -->
-          <div class="w-[48%] rounded-2xl overflow-hidden self-end h-[75%]">
-            <img
-              src="@/assets/img/heroImg-2.jpg"
-              alt="Students working together"
-              class="w-full h-full object-cover"
-            />
-          </div>
+          <div
+            class="w-[48%] rounded-2xl self-end h-[75%]"
+            :style="{ backgroundImage: `url(${heroImg2})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }"
+            role="img"
+            aria-label="Students working together"
+          ></div>
         </div>
 
         <!-- Mobile: single image -->
-        <div class="sm:hidden rounded-2xl overflow-hidden h-56 order-1">
-          <img
-            src="@/assets/img/heroImg-1.jpg"
-            alt="Students collaborating on campus"
-            class="w-full h-full object-cover"
-          />
-        </div>
+        <div
+          class="sm:hidden rounded-2xl h-80 order-1"
+          :style="{ backgroundImage: `url(${heroImg1})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }"
+          role="img"
+          aria-label="Students collaborating on campus"
+        ></div>
 
       </div>
     </div>
@@ -62,6 +59,8 @@
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { useToast } from '@/composables/useToast'
+import heroImg1 from '@/assets/img/publicImages/hero_img_1.png'
+import heroImg2 from '@/assets/img/publicImages/hero_img_2.png'
 
 const router = useRouter()
 const authStore = useAuthStore()
