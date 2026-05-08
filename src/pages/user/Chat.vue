@@ -18,14 +18,7 @@
           </div>
         </div>
         <div class="sidebar-header-actions">
-          <!-- Socket indicator -->
-          <div class="socket-dot" :class="chatStore.socketConnected ? 'connected' : 'disconnected'" :title="chatStore.socketConnected ? 'Live' : 'Reconnecting…'" />
-          <!-- Refresh -->
-          <button class="icon-btn" :disabled="chatStore.roomsLoading" @click="refreshRooms" title="Refresh">
-            <svg class="h-4 w-4" :class="{ 'spin': chatStore.roomsLoading }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-          </button>
+          <!-- connection managed silently -->
         </div>
       </div>
 
@@ -727,11 +720,15 @@ async function openRoom(room) {
   chatStore.setActiveRoom(room.roomId);
   showRoomList.value = false;
   if (!chatStore.messagesByRoom[room.roomId]) {
+    // First time opening — full fetch (shows skeleton)
     try {
       await chatStore.fetchMessages(room.roomId);
     } catch (err) {
       if (err?.code !== "ERR_CANCELED") toast.error("Failed to load messages");
     }
+  } else {
+    // Already cached — silently pull any new messages in background
+    chatStore.silentFetchMessages(room.roomId);
   }
   chatStore.markRoomRead(room.roomId);
   await nextTick();
@@ -849,6 +846,29 @@ function scheduleReconnect() {
   }, 3000);
 }
 
+// ── Ambient silent poll — runs regardless of socket state ─────
+// Production load balancers sometimes silently drop WebSocket connections
+// without triggering a disconnect event. A 15s silent background poll
+// ensures messages always arrive even when the socket appears "connected".
+let ambientPollTimer = null;
+
+function startAmbientPoll() {
+  if (ambientPollTimer) return;
+  ambientPollTimer = setInterval(() => {
+    chatStore.silentSyncRooms();
+    if (chatStore.activeRoomId) {
+      chatStore.silentFetchMessages(chatStore.activeRoomId);
+    }
+  }, 15_000);
+}
+
+function stopAmbientPoll() {
+  if (ambientPollTimer) {
+    clearInterval(ambientPollTimer);
+    ambientPollTimer = null;
+  }
+}
+
 // ── Watchers ──────────────────────────────────────────────────
 watch(
   () => chatStore.activeMessages.length,
@@ -930,11 +950,9 @@ onMounted(async () => {
     toast.error("Failed to load chats");
   }
 
-  // ── FIX: connect with authStore.accessToken (not userStore.token) ──
-  // Wait one tick so the authStore token is guaranteed to be restored
-  // from localStorage before we try to connect.
   await nextTick();
   ensureSocketConnected();
+  startAmbientPoll();
 
   document.addEventListener("visibilitychange", onVisibilityChange);
   document.addEventListener("click", onDocClick);
@@ -942,6 +960,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   clearTimeout(reconnectTimer);
+  stopAmbientPoll();
   chatStore.disconnectSocket();
   document.removeEventListener("visibilitychange", onVisibilityChange);
   document.removeEventListener("click", onDocClick);
@@ -949,10 +968,8 @@ onUnmounted(() => {
 
 function onVisibilityChange() {
   if (document.visibilityState === "visible") {
-    // ── FIX: attempt reconnect first, then sync ──────────────────────
-    // In production, the socket is often dead after the tab has been
-    // in the background. Re-establish first, then pull missed messages.
     ensureSocketConnected();
+    // Sync silently — no loading states, no visible flicker
     chatStore.syncActiveRoom();
   }
 }

@@ -230,6 +230,50 @@ export const useChatStore = defineStore("chat", () => {
     }
   }
 
+  /**
+   * Silently fetch latest messages for a room — no loading flag, no skeleton.
+   * Only appends genuinely new messages (deduped by _id/id).
+   * Used by polling fallback, visibility-change sync, and room-open refresh.
+   */
+  async function silentFetchMessages(roomId) {
+    if (messagesLoadingByRoom.value[roomId]) return; // full fetch already in flight
+    try {
+      const res = await chatApi.getMessages(roomId, { limit: 30 });
+      const incoming = res?.data?.messages || [];
+      const existing = messagesByRoom.value[roomId] || [];
+      const existingIds = new Set(existing.map((m) => m._id || m.id));
+      const newOnes = incoming.filter((m) => !existingIds.has(m._id || m.id));
+      if (newOnes.length) {
+        messagesByRoom.value = {
+          ...messagesByRoom.value,
+          [roomId]: [...existing, ...newOnes],
+        };
+      }
+      // Always update hasMore/cursor from latest fetch
+      if (res?.data) {
+        hasMoreByRoom.value[roomId] = res.data.hasMore || false;
+        nextCursorByRoom.value[roomId] = res.data.nextCursor || null;
+      }
+    } catch {
+      // Silent — never surface errors from background syncs
+    }
+  }
+
+  /**
+   * Silently refresh room list — no roomsLoading flag.
+   * Updates last message previews and unread counts without flickering.
+   */
+  async function silentSyncRooms() {
+    if (roomsLoading.value) return;
+    try {
+      const res = await chatApi.getRooms();
+      const fresh = res?.data?.rooms || [];
+      if (fresh.length) rooms.value = fresh;
+    } catch {
+      // Silent
+    }
+  }
+
   async function sendMessage(roomId, content, replyToId = null) {
     actionLoading.value = true;
     error.value = null;
@@ -343,10 +387,20 @@ export const useChatStore = defineStore("chat", () => {
    *   (read marking is now done via REST PUT /:roomId/read)
    */
   function connectSocket(token) {
+    // If already connected, nothing to do
     if (socket.value?.connected) return;
+    // If a socket exists but is disconnected, tear it down cleanly first
+    // so we don't accumulate ghost listeners
+    if (socket.value) {
+      socket.value.removeAllListeners();
+      socket.value.disconnect();
+      socket.value = null;
+    }
 
     const socketUrl =
-      import.meta.env.VITE_API_BASE_URL || window.location.origin;
+      import.meta.env.VITE_SOCKET_URL ||
+      import.meta.env.VITE_API_BASE_URL ||
+      "https://campusbasebackend.onrender.com";
 
     const s = io(socketUrl, {
       auth: { token },
@@ -517,17 +571,18 @@ export const useChatStore = defineStore("chat", () => {
     if (pollInterval || !activeRoomId.value) return;
     pollInterval = setInterval(() => {
       const roomId = activeRoomId.value;
-      if (roomId && !messagesLoadingByRoom.value[roomId]) {
-        fetchMessages(roomId).catch(() => {});
+      if (roomId) {
+        silentFetchMessages(roomId);
+        silentSyncRooms();
       }
-    }, 5_000); // 5s when socket is down
+    }, 5_000);
   }
 
-  /** Call when page regains visibility — fetches both rooms list and active messages */
-  async function syncActiveRoom() {
-    fetchRooms().catch(() => {});
-    if (activeRoomId.value && !messagesLoadingByRoom.value[activeRoomId.value]) {
-      fetchMessages(activeRoomId.value).catch(() => {});
+  /** Call when page regains visibility — silently syncs rooms and active messages */
+  function syncActiveRoom() {
+    silentSyncRooms();
+    if (activeRoomId.value) {
+      silentFetchMessages(activeRoomId.value);
     }
   }
 
@@ -610,6 +665,8 @@ export const useChatStore = defineStore("chat", () => {
     // Actions
     fetchRooms,
     fetchMessages,
+    silentFetchMessages,
+    silentSyncRooms,
     sendMessage,
     injectSocketMessage,
     setActiveRoom,
