@@ -823,7 +823,30 @@ export const useErrandStore = defineStore("errand", () => {
       // console.error("Failed to refresh user data:", err);
     }
   }
-
+// ─── Deadline Extension ───────────────────────────────────────
+async function extendDeadline(errandId, data) {
+  actionLoading.value = true;
+  error.value = null;
+  try {
+    const res = await errandApi.extendDeadline(errandId, data);
+    // Update local state
+    const errand = findErrandById(errandId);
+    if (errand && res?.data?.errand) {
+      errand.deadline = res.data.errand.deadline;
+    }
+    if (current.value?._id === errandId && res?.data?.errand) {
+      current.value = { ...current.value, deadline: res.data.errand.deadline };
+    }
+    // Refresh posted list
+    await fetchMyPosted();
+    return res;
+  } catch (err) {
+    error.value = err.response?.data?.message || "Failed to extend deadline";
+    throw err;
+  } finally {
+    actionLoading.value = false;
+  }
+}
   return {
     // State
     market,
@@ -913,6 +936,7 @@ export const useErrandStore = defineStore("errand", () => {
     payErrand,
 
     fetchErrandMatches,
+    extendDeadline,
 
     clearCurrent,
     resetError,

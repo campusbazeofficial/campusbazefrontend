@@ -79,7 +79,7 @@
         />
 
         <template v-else>
-          <MyErrandCard
+         <MyErrandCard
             v-for="errand in postedErrands"
             :key="errand._id"
             :errand="errand"
@@ -90,6 +90,7 @@
             @confirm="lifecycle.triggerConfirm(errand)"
             @dispute="lifecycle.triggerDispute(errand)"
             @pay="(errand) => handlePay(errand._id)"
+            @repost="openExtendDeadline(errand)"
           />
           <Pagination
             v-if="postedTotalPages > 1"
@@ -303,6 +304,27 @@
         pendingWithdraw = null;
       "
     />
+
+
+
+       <!-- Extend Deadline Modal -->
+    <Teleport to="body">
+      <Transition name="overlay">
+        <div
+          v-if="showExtendDeadlineModal"
+          class="fixed inset-0 z-[300] flex items-end justify-center bg-cb-overlay p-0 backdrop-blur-sm sm:items-center sm:p-4"
+          @click.self="showExtendDeadlineModal = false"
+        >
+          <ExtendDeadlineModal
+            :errand="selectedErrandForExtend"
+            :loading="errandStore.actionLoading"
+            :store-error="errandStore.error"
+            @close="showExtendDeadlineModal = false"
+            @confirm="handleExtendDeadline"
+          />
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -325,6 +347,7 @@ import CompleteErrandModal from "@/components/errands/CompleteErrandModal.vue";
 import DisputeModal from "@/components/errands/DisputeModal.vue";
 import ConfirmModal from "@/components/reusables/ConfirmModal.vue";
 import Pagination from "@/components/reusables/Pagination.vue";
+import ExtendDeadlineModal from "@/components/errands/ExtendDeadlineModal.vue";
 
 const router = useRouter();
 const errandStore = useErrandStore();
@@ -489,7 +512,30 @@ async function handleDisputeConfirm(reason) {
     toast.error(result.error || "Failed to submit dispute");
   }
 }
+// ── Extend Deadline ──────────────────────────────────────────
+const showExtendDeadlineModal = ref(false);
+const selectedErrandForExtend = ref(null);
 
+function openExtendDeadline(errand) {
+  selectedErrandForExtend.value = errand;
+  showExtendDeadlineModal.value = true;
+}
+
+async function handleExtendDeadline({ date, time }) {
+  if (!selectedErrandForExtend.value) return;
+  
+  try {
+    await errandStore.extendDeadline(selectedErrandForExtend.value._id, {
+      date,
+      time,
+    });
+    showExtendDeadlineModal.value = false;
+    toast.success("Deadline extended successfully!");
+    fetchPosted();
+  } catch (err) {
+    toast.error(errandStore.error || "Failed to extend deadline");
+  }
+}
 // ── Silent polling for escrow confirmation ────────────────────
 let pollInterval = null;
 
@@ -541,4 +587,12 @@ onMounted(async () => {
 <style scoped>
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.overlay-enter-active,
+.overlay-leave-active {
+  transition: opacity 0.2s ease;
+}
+.overlay-enter-from,
+.overlay-leave-to {
+  opacity: 0;
+}
 </style>

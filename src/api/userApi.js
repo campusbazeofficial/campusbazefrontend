@@ -79,6 +79,16 @@ export const userApi = {
     const response = await api.get("/api/v1/users/search", { params });
     return response.data;
   },
+    async getRecentSearches() {
+    const response = await api.get("/api/v1/users/search/get-recent");
+    return response.data;
+  },
+
+  async clearRecentSearches() {
+    const response = await api.delete("/api/v1/users/search/clear-recent");
+    return response.data;
+  },
+
   // ── Referral ───────────────────────────────────────────────
   async getReferralInfo() {
     const response = await api.get("/api/v1/users/me/referral");

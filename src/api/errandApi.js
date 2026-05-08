@@ -126,4 +126,13 @@ async getErrandMatches(errandId) {
   const response = await api.get(`/api/v1/errands/${errandId}/matches`);
   return response.data;
 },
+
+// ─── Deadline Extension ────────────────────────────────────
+async extendDeadline(errandId, data) {
+  const response = await api.patch(
+    `/api/v1/errands/${errandId}/extend-deadline`,
+    data
+  );
+  return response.data;
+},
 };

@@ -46,7 +46,7 @@
         </span>
 
         <span
-          :class="['inline-flex items-center gap-1.5 text-xs', urgent ? 'text-cb-warning' : 'text-cb-muted']"
+          :class="['inline-flex items-center gap-1.5 text-xs', urgent || isExpired ? 'text-cb-warning' : 'text-cb-muted']"
         >
           <i class="fa-regular fa-clock text-[10px]"></i>
           {{ deadlineLabel }}
@@ -91,6 +91,16 @@
 
         <!-- Actions -->
         <div class="flex flex-wrap items-center gap-2">
+          <!-- Repost/Extend button for expired errands with no bids -->
+          <button
+            v-if="showRepostButton"
+            class="inline-flex items-center gap-1.5 rounded-lg bg-cb-warning px-3 py-1.5 text-xs font-semibold text-cb-contrast transition-colors hover:bg-cb-warning-dark disabled:opacity-60"
+            @click="$emit('repost', errand)"
+          >
+            <i class="fa-solid fa-clock-rotate-left text-[9px]"></i>
+            Repost
+          </button>
+
           <!-- Poster actions -->
           <template v-if="role === 'poster'">
             <!-- Poster must pay -->
@@ -133,7 +143,7 @@
             </button>
 
             <button
-              v-if="errand.status === 'posted'"
+              v-if="errand.status === 'posted' && !showRepostButton"
               class="flex h-8 w-8 items-center justify-center rounded-lg border border-cb-negative/20 bg-cb-negative-subtle text-cb-negative transition-colors hover:opacity-80"
               title="Cancel errand"
               @click="$emit('cancel', errand)"
@@ -204,7 +214,7 @@ const props = defineProps({
   actionLoading: { type: Boolean, default: false },
 })
 
-defineEmits(['click', 'cancel', 'confirm', 'start', 'complete', 'dispute', 'pay'])
+defineEmits(['click', 'cancel', 'confirm', 'start', 'complete', 'dispute', 'pay', 'repost'])
 
 // ── Category ──────────────────────────────────────────────────
 const CATEGORY_ICON_MAP = {
@@ -246,8 +256,13 @@ const bidCount = computed(() =>
 )
 
 // ── Deadline ──────────────────────────────────────────────────
-const urgent = computed(() => {
+const isExpired = computed(() => {
   if (!props.errand.deadline) return false
+  return new Date(props.errand.deadline) - new Date() < 0
+})
+
+const urgent = computed(() => {
+  if (!props.errand.deadline || isExpired.value) return false
   return (new Date(props.errand.deadline) - new Date()) / 3_600_000 < 24
 })
 
@@ -259,5 +274,15 @@ const deadlineLabel = computed(() => {
   if (h < 24) return `${Math.round(h)}h left`
   const d = Math.ceil(h / 24)
   return `${d} day${d > 1 ? 's' : ''} left`
+})
+
+// ── Repost button logic ──────────────────────────────────────
+// Only show for poster's own expired errands with status 'posted' and no bids
+const showRepostButton = computed(() => {
+  if (props.role !== 'poster') return false
+  if (props.errand.status !== 'posted') return false
+  if (!isExpired.value) return false
+  if (bidCount.value > 0) return false
+  return true
 })
 </script>
