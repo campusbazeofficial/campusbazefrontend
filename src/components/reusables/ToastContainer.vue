@@ -7,7 +7,6 @@
           v-for="t in toasts"
           :key="t.id"
           class="toast-item"
-          :class="typeClass(t.type)"
         >
           <!-- icon -->
           <div class="toast-icon" :class="iconBg(t.type)">
@@ -31,15 +30,6 @@
 import { useToast } from '@/composables/useToast'
 
 const { toasts, dismiss } = useToast()
-
-function typeClass(type) {
-  return {
-    success: 'border-emerald-100',
-    error:   'border-red-100',
-    warning: 'border-amber-100',
-    info:    'border-gray-100',
-  }[type]
-}
 
 function iconBg(type) {
   return {
@@ -95,7 +85,6 @@ function iconClass(type) {
   gap: 0.65rem;
   padding: 0.65rem 0.85rem;
   border-radius: 12px;
-  border: 1px solid;
   background: white;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.09);
   pointer-events: auto;
@@ -151,7 +140,6 @@ function iconClass(type) {
   transition: all 0.18s ease;
 }
 
-/* mobile slides down from top, desktop slides up from bottom */
 .toast-enter-from {
   opacity: 0;
   transform: translateY(-10px) scale(0.96);

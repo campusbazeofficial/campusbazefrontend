@@ -3,8 +3,31 @@
     <div class="green-circle"></div>
 
     <div class="mx-auto max-w-6xl w-full px-4 sm:px-6 lg:px-8 relative z-10">
-      <div class="card">
+      <!-- Loading State -->
+      <div v-if="store.loading" class="card flex items-center justify-center min-h-[300px]">
+        <div class="flex flex-col items-center gap-4">
+          <div class="animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-cb-accent)] border-t-transparent"></div>
+          <p class="text-[var(--color-cb-muted)] text-sm">Loading reviews...</p>
+        </div>
+      </div>
 
+      <!-- Error State -->
+      <div v-else-if="store.error" class="card flex items-center justify-center min-h-[300px]">
+        <div class="text-center">
+          <p class="text-red-500 mb-2">Failed to load reviews</p>
+          <button @click="loadReviews" class="text-[var(--color-cb-accent)] underline text-sm hover:no-underline">
+            Try again
+          </button>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else-if="testimonials.length === 0" class="card flex items-center justify-center min-h-[300px]">
+        <p class="text-[var(--color-cb-muted)] text-sm">No reviews yet. Be the first to share your experience!</p>
+      </div>
+
+      <!-- Reviews Display -->
+      <div v-else class="card">
         <!-- Left: reviewer list -->
         <div class="reviewer-list">
           <p class="section-label">Student Reviews</p>
@@ -24,7 +47,7 @@
               <TransitionGroup name="slide" tag="div" class="avatars-inner">
                 <div
                   v-for="t in visibleTestimonials"
-                  :key="t.id"
+                  :key="t._id"
                   class="avatar-slot"
                   :class="t.slotClass"
                   @click="goTo(t.originalIndex)"
@@ -64,7 +87,6 @@
             </div>
           </Transition>
         </div>
-
       </div>
     </div>
 
@@ -74,46 +96,60 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useReviewStore } from '@/stores/reviewStore'
 
+const store = useReviewStore()
 const activeIndex = ref(0)
 let timer = null
 
-const testimonials = [
-  {
-    id: 1,
-    name: 'Amara Okafor',
-    avatar: 'https://i.pravatar.cc/150?img=47',
-    rating: '4.9',
-    date: '12 Jan, 2025',
-    quote: 'CampusBaze saved me so much time. I posted an errand for someone to pick up my materials from the department and it was done within the hour. Incredibly seamless and easy process.',
-  },
-  {
-    id: 2,
-    name: 'Chukwuemeka Eze',
-    avatar: 'https://i.pravatar.cc/150?img=11',
-    rating: '5.0',
-    date: '3 Feb, 2025',
-    quote: 'I started offering my graphic design skills on Campus Baze and within two weeks I had made enough to cover my feeding for the month. This platform is a total game changer for students.',
-  },
-  {
-    id: 3,
-    name: 'Fatima Aliyu',
-    avatar: 'https://i.pravatar.cc/150?img=44',
-    rating: '4.8',
-    date: '18 Mar, 2025',
-    quote: 'Knowing that everyone is verified through their university makes me feel completely safe. I have used it three times now and every experience has been smooth and reliable.',
-  },
-]
+// Transform API reviews to testimonials format
+const testimonials = computed(() => {
+  return store.publicReviews.map(review => ({
+    _id: review._id,
+    name: review.reviewerId?.fullName || 'Anonymous',
+    avatar: review.reviewerId?.avatar || 'https://i.pravatar.cc/150?img=1',
+    rating: review.rating.toFixed(1),
+    date: formatDate(review.createdAt),
+    quote: review.comment,
+    originalIndex: 0 // Will be set by visibleTestimonials
+  }))
+})
+
+// Format date helper
+function formatDate(dateString) {
+  const date = new Date(dateString)
+  const day = date.getDate()
+  const month = date.toLocaleString('en-US', { month: 'short' })
+  const year = date.getFullYear()
+  return `${day} ${month}, ${year}`
+}
 
 const visibleTestimonials = computed(() => {
-  const len = testimonials.length
+  const len = testimonials.value.length
+  if (len === 0) return []
+  
+  // Handle case with only 1 or 2 testimonials
+  if (len === 1) {
+    return [{ ...testimonials.value[0], slotClass: 'slot-active', originalIndex: 0 }]
+  }
+  
+  if (len === 2) {
+    const curr = activeIndex.value % 2
+    const next = (curr + 1) % 2
+    return [
+      { ...testimonials.value[curr], slotClass: 'slot-prev', originalIndex: curr },
+      { ...testimonials.value[next], slotClass: 'slot-active', originalIndex: next },
+    ]
+  }
+  
+  // Normal case: 3 or more testimonials
   const prev = (activeIndex.value - 1 + len) % len
   const curr = activeIndex.value
   const next = (activeIndex.value + 1) % len
   return [
-    { ...testimonials[prev], slotClass: 'slot-prev', originalIndex: prev },
-    { ...testimonials[curr], slotClass: 'slot-active', originalIndex: curr },
-    { ...testimonials[next], slotClass: 'slot-next', originalIndex: next },
+    { ...testimonials.value[prev], slotClass: 'slot-prev', originalIndex: prev },
+    { ...testimonials.value[curr], slotClass: 'slot-active', originalIndex: curr },
+    { ...testimonials.value[next], slotClass: 'slot-next', originalIndex: next },
   ]
 })
 
@@ -123,7 +159,8 @@ function goTo(index) {
 }
 
 function next() {
-  activeIndex.value = (activeIndex.value + 1) % testimonials.length
+  if (testimonials.value.length === 0) return
+  activeIndex.value = (activeIndex.value + 1) % testimonials.value.length
 }
 
 function resetTimer() {
@@ -131,8 +168,24 @@ function resetTimer() {
   timer = setInterval(next, 5000)
 }
 
-onMounted(() => { timer = setInterval(next, 5000) })
-onUnmounted(() => { clearInterval(timer) })
+async function loadReviews() {
+  try {
+    await store.fetchPublicReviews({ limit: 20 })
+    activeIndex.value = 0 // Reset to first review
+  } catch (error) {
+    console.error('Failed to load reviews:', error)
+  }
+}
+
+onMounted(() => {
+  loadReviews()
+  timer = setInterval(next, 5000)
+})
+
+onUnmounted(() => {
+  clearInterval(timer)
+  store.reset()
+})
 </script>
 
 <style scoped>
@@ -193,6 +246,20 @@ onUnmounted(() => { clearInterval(timer) })
     gap: 0;
     padding: 2.5rem 2.5rem;
     min-height: 300px;
+  }
+}
+
+/* ── Loading Spinner ── */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 
