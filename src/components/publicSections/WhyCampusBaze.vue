@@ -1,14 +1,28 @@
 <template>
-  <section class="py-16 sm:py-20 lg:py-28" style="background-color: var(--color-cb-card)">
-    <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+  <section class="relative overflow-hidden py-16 sm:py-20 lg:py-28" style="background-color: var(--color-cb-card)">
+
+    <!-- Background decorations -->
+    <div class="pointer-events-none absolute inset-0">
+      <div class="absolute -top-32 -left-32 size-[500px] rounded-full blur-[120px]"
+        style="background: radial-gradient(circle, color-mix(in srgb, var(--color-cb-accent) 10%, transparent), transparent 70%)" />
+      <div class="absolute -bottom-32 -right-32 size-[400px] rounded-full blur-[100px]"
+        style="background: radial-gradient(circle, color-mix(in srgb, var(--color-cb-accent) 8%, transparent), transparent 70%)" />
+      <div class="absolute inset-0 opacity-25"
+        style="
+          background-image: radial-gradient(circle, var(--color-cb-divider) 1px, transparent 1px);
+          background-size: 32px 32px;
+          mask-image: radial-gradient(ellipse 90% 90% at 50% 50%, black, transparent);
+        " />
+    </div>
+
+    <div class="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
 
       <!-- Header -->
       <div class="max-w-2xl mb-16 sm:mb-20">
         <p class="section-label">Why Campus Base</p>
         <h2 class="section-title">Built for Campus Life</h2>
         <p class="section-sub">
-          CampusBaze understands the fast-paced, everyday needs of students and campus
-          communities making it easy to get help or earn on your own schedule.
+          Campus Baze also connects the students community to real world opportunities by attracting entrepreneurs, organizations who can hire the students, offer internship and scholarship opportunities to students.
         </p>
       </div>
 
@@ -22,10 +36,14 @@
         >
           <!-- Icon Block -->
           <div class="feature-icon-block">
-            <div class="icon-ring">
+            <div class="glow-ring" />
+            <div class="mid-ring" />
+            <div class="icon-card">
               <component :is="feature.icon" class="icon-svg" />
             </div>
             <div class="feature-number">0{{ index + 1 }}</div>
+            <div class="accent-dot accent-dot--tl" />
+            <div class="accent-dot accent-dot--br" />
           </div>
 
           <!-- Text Block -->
@@ -35,7 +53,11 @@
             <p class="feature-desc">{{ feature.desc }}</p>
             <ul class="feature-points">
               <li v-for="point in feature.points" :key="point" class="feature-point">
-                <span class="point-dot"></span>
+                <span class="point-check">
+                  <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
                 {{ point }}
               </li>
             </ul>
@@ -103,7 +125,7 @@ const features = [
     id: 4,
     tag: 'Community first',
     title: 'A Trusted Campus Community',
-    desc: 'Everyone on CampusBaze is verified through their university. Ratings, reviews, and profiles ensure you always know who you\'re dealing with.',
+    desc: 'Everyone on Campus Baze is verified through their university. Ratings, reviews, and profiles ensure you always know who you\'re dealing with.',
     points: ['University-verified accounts', 'Ratings and reviews after every task', 'Report and moderation system'],
     icon: IconTrust,
   },
@@ -118,9 +140,9 @@ const features = [
   {
     id: 6,
     tag: 'Made for you',
-    title: 'Campus-Only Access',
-    desc: 'CampusBaze is exclusively for students and staff of partner universities keeping the platform focused, safe, and relevant to your campus life.',
-    points: ['University email verification', 'Campus-scoped listings and tasks', 'Your community, your marketplace'],
+    title: 'Campus-Global Access',
+    desc: 'Campusbaze connects  the students with Entrepreneurs, organizations, individuals and also students who need to hire freelancers. ',
+    points: ['Campus-scoped listing for errands', 'Verified students community. ', 'Trusted and talented students.'],
     icon: IconCampus,
   },
 ]
@@ -129,6 +151,7 @@ const features = [
 <style scoped>
 @reference "@/style.css";
 
+/* ── Section header ── */
 .section-label {
   font-size: 0.75rem;
   font-weight: 500;
@@ -137,7 +160,6 @@ const features = [
   color: var(--color-cb-accent);
   margin-bottom: 0.5rem;
 }
-
 .section-title {
   font-size: clamp(1.75rem, 3vw, 2.25rem);
   font-weight: 500;
@@ -145,7 +167,6 @@ const features = [
   color: var(--color-cb-text);
   margin-bottom: 1rem;
 }
-
 .section-sub {
   font-size: 1rem;
   line-height: 1.75;
@@ -153,13 +174,13 @@ const features = [
   max-width: 560px;
 }
 
+/* ── Row layout ── */
 .feature-row {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2.5rem;
 }
-
 @media (min-width: 1024px) {
   .feature-row {
     flex-direction: row;
@@ -168,6 +189,7 @@ const features = [
   }
 }
 
+/* ── Icon block ── */
 .feature-icon-block {
   position: relative;
   flex-shrink: 0;
@@ -176,52 +198,109 @@ const features = [
   justify-content: center;
   width: 100%;
   max-width: 320px;
+  height: 260px;
 }
-
+@media (max-width: 1023px) {
+  .feature-icon-block {
+    display: none;
+  }
+}
 @media (min-width: 1024px) {
   .feature-icon-block {
     width: 340px;
-    height: 280px;
+    height: 300px;
   }
 }
 
-.icon-ring {
-  width: 160px;
-  height: 160px;
+/* Outer pulsing glow ring */
+.glow-ring {
+  position: absolute;
+  width: 220px;
+  height: 220px;
   border-radius: 50%;
-  border: 1px solid var(--color-cb-divider);
-  background-color: var(--color-cb-card);
+  border: 1px dashed color-mix(in srgb, var(--color-cb-accent) 30%, transparent);
+  animation: spin-slow 18s linear infinite;
+}
+.glow-ring::before {
+  content: '';
+  position: absolute;
+  inset: -40px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--color-cb-accent) 12%, transparent), transparent 70%);
+  filter: blur(20px);
+}
+
+/* Mid ring */
+.mid-ring {
+  position: absolute;
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--color-cb-accent) 20%, transparent);
+  background: color-mix(in srgb, var(--color-cb-accent) 4%, transparent);
+}
+
+/* Icon card */
+.icon-card {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  border-radius: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--color-cb-accent) 18%, var(--color-cb-card)),
+    var(--color-cb-card)
+  );
+  border: 1px solid color-mix(in srgb, var(--color-cb-accent) 30%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--color-cb-accent) 10%, transparent),
+    0 8px 32px color-mix(in srgb, var(--color-cb-accent) 15%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 8%, transparent);
 }
 
 .icon-svg {
-  width: 64px;
-  height: 64px;
+  width: 52px;
+  height: 52px;
   color: var(--color-cb-accent);
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--color-cb-accent) 50%, transparent));
 }
 
+/* Feature number */
 .feature-number {
   position: absolute;
   top: 0;
   right: 0;
   font-size: 5rem;
-  font-weight: 400;
+  font-weight: 700;
   line-height: 1;
-  color: var(--color-cb-divider);
+  color: transparent;
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--color-cb-accent) 18%, transparent);
   user-select: none;
   pointer-events: none;
 }
-
 @media (max-width: 1023px) {
   .feature-number {
     font-size: 3rem;
-    top: -1rem;
+    top: -0.5rem;
     right: 1rem;
   }
 }
 
+/* Floating accent dots */
+/* .accent-dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-cb-accent);
+  opacity: 0.6;
+}
+.accent-dot--tl { top: 24px; left: 30px; animation: float 4s ease-in-out infinite; }
+.accent-dot--br { bottom: 24px; right: 30px; animation: float 4s ease-in-out infinite 2s; } */
+
+/* ── Text block ── */
 .feature-text {
   flex: 1;
   display: flex;
@@ -274,11 +353,31 @@ const features = [
   color: var(--color-cb-muted);
 }
 
-.point-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background-color: var(--color-cb-accent);
+/* Checkmark badge replacing plain dot */
+.point-check {
   flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: var(--color-cb-accent-subtle);
+  color: var(--color-cb-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+.point-check svg {
+  width: 10px;
+  height: 10px;
+}
+
+/* ── Keyframes ── */
+/* @keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0);    opacity: 0.6; }
+  50%       { transform: translateY(-8px); opacity: 1;   }
+} */
 </style>

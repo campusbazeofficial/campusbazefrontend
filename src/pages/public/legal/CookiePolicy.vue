@@ -13,13 +13,13 @@ import LegalLayout from './LegalLayout.vue'
 
 const contact = {
   text: 'If you have questions about our use of cookies, please contact our support team.',
-  email: 'support@campusbaze.com',
+  email: 'campusbazeofficial@gmail.com',
 }
 
 const sections = [
   {
     heading: 'What Are Cookies',
-    body: 'Cookies are small text files placed on your device by a website when you visit it. They are widely used to make websites work efficiently, remember your preferences, and provide information to the website owners. CampusBaze uses cookies to improve your experience and ensure the platform functions correctly.',
+    body: 'Cookies are small text files placed on your device by a website when you visit it. They are widely used to make websites work efficiently, remember your preferences, and provide information to the website owners. Campus Baze uses cookies to improve your experience and ensure the platform functions correctly.',
   },
   {
     heading: 'How We Use Cookies',
@@ -45,21 +45,21 @@ const sections = [
       },
       {
         title: 'Analytics Cookies',
-        text: 'These cookies help us understand how users interact with CampusBaze. The data collected is aggregated and anonymous and is used solely to improve platform performance and user experience.',
+        text: 'These cookies help us understand how users interact with Campus Baze. The data collected is aggregated and anonymous and is used solely to improve platform performance and user experience.',
       },
     ],
   },
   {
     heading: 'Third-Party Cookies',
-    body: 'Some features of CampusBaze may be provided by third-party services, such as payment processors. These third parties may set their own cookies on your device. CampusBaze does not control the use of these cookies and recommends reviewing the privacy and cookie policies of relevant third-party services.',
+    body: 'Some features of Campus Baze may be provided by third-party services, such as payment processors. These third parties may set their own cookies on your device. Campus Baze does not control the use of these cookies and recommends reviewing the privacy and cookie policies of relevant third-party services.',
   },
   {
     heading: 'Managing Cookies',
-    body: 'You can manage or disable cookies through your browser settings at any time. Please note that disabling certain cookies may affect the functionality of CampusBaze. Essential cookies cannot be turned off as they are required for the platform to operate.',
+    body: 'You can manage or disable cookies through your browser settings at any time. Please note that disabling certain cookies may affect the functionality of Campus Baze. Essential cookies cannot be turned off as they are required for the platform to operate.',
   },
   {
     heading: 'Changes to This Policy',
-    body: 'CampusBaze may update this Cookie Policy from time to time to reflect changes in technology, regulation, or platform operations. Any significant updates will be communicated through the platform. Continued use of CampusBaze after such changes constitutes acceptance of the updated policy.',
+    body: 'CampusBaze may update this Cookie Policy from time to time to reflect changes in technology, regulation, or platform operations. Any significant updates will be communicated through the platform. Continued use of Campus Baze after such changes constitutes acceptance of the updated policy.',
   },
 ]
 </script>

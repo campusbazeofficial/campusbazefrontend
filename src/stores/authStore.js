@@ -179,6 +179,20 @@ export const useAuthStore = defineStore("auth", () => {
     }
   }
 
+  async function changePassword(currentPassword, newPassword) {
+    loading.value = true;
+    error.value = null;
+    try {
+      const response = await authApi.changePassword(currentPassword, newPassword);
+      return response;
+    } catch (err) {
+      error.value = err.response?.data?.message || "Failed to change password";
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  }
+
   async function login(credentials) {
     if (loginPromise) return loginPromise;
 
@@ -351,6 +365,7 @@ export const useAuthStore = defineStore("auth", () => {
     registerCorporate,
     verifyEmail,
     resendOtp,
+    changePassword,
     login,
     adminLogin,
     logout,

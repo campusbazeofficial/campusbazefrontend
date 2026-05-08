@@ -37,6 +37,14 @@ export const authApi = {
     const response = await api.post("/api/v1/admin/login", credentials);
     return response.data;
   },
+ // Change Password
+  async changePassword(currentPassword, newPassword) {
+    const response = await api.patch("/api/v1/auth/change-password", {
+      currentPassword,
+      newPassword,
+    });
+    return response.data;
+  },
 
   // Refresh tokens
   async refreshToken(refreshToken) {

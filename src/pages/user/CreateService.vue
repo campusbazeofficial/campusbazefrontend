@@ -132,56 +132,79 @@
               </p>
             </div>
 
-            <!-- Category -->
-            <div>
-              <label class="mb-1.5 block text-sm font-semibold text-cb-text">
-                Category <span class="text-cb-negative">*</span>
-              </label>
+          <!-- Category -->
+<div>
+  <label class="mb-1.5 block text-sm font-semibold text-cb-text">
+    Category <span class="text-cb-negative">*</span>
+  </label>
 
-              <div class="rounded-xl px-2 py-1 focus-within:border-cb-accent">
-                <AppDropdown
-                  ref="categoryDropdownRef"
-                  :label="selectedCategoryLabel"
-                  :min-width="240"
-                  @close="clearFieldError('category')"
-                >
-                  <div class="py-1">
-                    <button
-                      v-for="opt in categoryOptions"
-                      :key="opt.value"
-                      type="button"
-                      @click="selectCategory(opt.value)"
-                      :class="[
-                        'flex w-full items-center gap-2.5 px-3 py-2.5 text-sm transition-colors text-left',
-                        form.category === opt.value
-                          ? 'bg-cb-accent-subtle font-semibold text-cb-accent'
-                          : 'text-cb-text hover:bg-cb-field',
-                      ]"
-                    >
-                      <i
-                        :class="[
-                          opt.icon,
-                          'w-4 shrink-0 text-center text-[11px]',
-                          form.category === opt.value
-                            ? 'text-cb-accent'
-                            : 'text-cb-muted',
-                        ]"
-                      ></i>
-                      <span class="flex-1">{{ opt.label }}</span>
-                      <i
-                        v-if="form.category === opt.value"
-                        class="fa-solid fa-check text-[10px] text-cb-accent"
-                      ></i>
-                    </button>
-                  </div>
-                </AppDropdown>
-              </div>
+  <div class="rounded-xl px-2 py-1 focus-within:border-cb-accent">
+    <AppDropdown
+      ref="categoryDropdownRef"
+      :label="selectedCategoryLabel"
+      :min-width="240"
+      @close="clearFieldError('category')"
+    >
+      <div class="py-1 max-h-64 overflow-y-auto">
+        <button
+          v-for="opt in categoryOptions"
+          :key="opt.value"
+          type="button"
+          @click="selectCategory(opt.value)"
+          :class="[
+            'flex w-full items-center gap-2.5 px-3 py-2.5 text-sm transition-colors text-left',
+            form.category === opt.value
+              ? 'bg-cb-accent-subtle font-semibold text-cb-accent'
+              : 'text-cb-text hover:bg-cb-field',
+          ]"
+        >
+          <i
+            :class="[
+              opt.icon,
+              'w-4 shrink-0 text-center text-[11px]',
+              form.category === opt.value
+                ? 'text-cb-accent'
+                : 'text-cb-muted',
+            ]"
+          ></i>
+          <span class="flex-1">{{ opt.label }}</span>
+          <i
+            v-if="form.category === opt.value"
+            class="fa-solid fa-check text-[10px] text-cb-accent"
+          ></i>
+        </button>
+      </div>
+    </AppDropdown>
+  </div>
 
-              <p v-if="errors.category" class="mt-1.5 flex items-center gap-1.5 text-xs text-cb-negative animate-pulse">
-                <i class="fa-solid fa-circle-exclamation text-[10px]"></i>
-                {{ errors.category }}
-              </p>
-            </div>
+  <!-- Custom category input (shown when "Other" is selected) -->
+  <div v-if="form.category === 'other'" class="mt-3">
+    <div class="bg-cb-field rounded-md">
+      <input
+        v-model.trim="customCategory"
+        type="text"
+        maxlength="50"
+        placeholder="Type your category (e.g., Photography, Event Planning)"
+        :class="[
+          'w-full rounded-xl border-2 px-4 py-3 text-sm text-cb-text outline-none transition-colors placeholder:text-cb-muted-40',
+          customCategoryError
+            ? 'border-cb-negative/50 bg-cb-negative-subtle'
+            : 'border-cb-divider focus:border-cb-accent',
+        ]"
+        @input="customCategoryError = ''; clearFieldError('category')"
+      />
+    </div>
+    <p v-if="customCategoryError" class="mt-1.5 flex items-center gap-1.5 text-xs text-cb-negative animate-pulse">
+      <i class="fa-solid fa-circle-exclamation text-[10px]"></i>
+      {{ customCategoryError }}
+    </p>
+  </div>
+
+  <p v-if="errors.category" class="mt-1.5 flex items-center gap-1.5 text-xs text-cb-negative animate-pulse">
+    <i class="fa-solid fa-circle-exclamation text-[10px]"></i>
+    {{ errors.category }}
+  </p>
+</div>
 
             <!-- Description -->
             <div>
@@ -855,6 +878,8 @@ const errors = reactive({
 });
 
 const tagInput = ref("");
+const customCategory = ref("");
+const customCategoryError = ref("");
 const tagError = ref("");
 
 // Dropdown refs — used to close on selection
@@ -915,6 +940,7 @@ const canSubmit = computed(() => {
   if (!form.title.trim() || form.title.length < 5) return false;
   if (!form.description.trim() || form.description.length < 20) return false;
   if (!form.category) return false;
+  if (form.category === 'other' && !customCategory.value.trim()) return false;
   if (form.tiers.length === 0) return false;
   
   for (const tier of form.tiers) {
@@ -959,11 +985,25 @@ const validateForm = () => {
     isValid = false;
   }
 
-  if (!form.category) {
-    errors.category = "Please select a category";
-    isValid = false;
-  }
+if (!form.category) {
+  errors.category = "Please select a category";
+  isValid = false;
+}
 
+// Validate custom category when "Other" is selected
+if (form.category === 'other') {
+  if (!customCategory.value.trim()) {
+    customCategoryError.value = "Please specify your category";
+    errors.category = "Please specify your category";
+    isValid = false;
+  } else if (customCategory.value.trim().length < 3) {
+    customCategoryError.value = "Category must be at least 3 characters";
+    errors.category = "Category must be at least 3 characters";
+    isValid = false;
+  } else {
+    customCategoryError.value = '';
+  }
+}
   if (form.tiers.length === 0) {
     errors.tiers = "Add at least one pricing tier";
     isValid = false;
@@ -1175,6 +1215,8 @@ onUnmounted(() => sectionObserver?.disconnect());
 // Category
 function selectCategory(value) {
   form.category = value;
+  customCategory.value = '';
+  customCategoryError.value = '';
   clearFieldError('category');
   categoryDropdownRef.value?.close?.();
 }
@@ -1317,14 +1359,20 @@ async function handleSubmit() {
   }
 
   try {
-    const payload = { ...form };
-    // Filter out empty portfolio URLs
-    payload.portfolioUrls = payload.portfolioUrls.filter(
-      (url) => url.trim() !== "",
-    );
-    
-    // Sanitize tags (remove special characters)
-    payload.tags = payload.tags.map(tag => tag.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim());
+  const payload = { ...form };
+  
+  // Handle custom category
+  if (form.category === 'other') {
+    payload.customCategory = customCategory.value.trim();
+  }
+  
+  // Filter out empty portfolio URLs
+  payload.portfolioUrls = payload.portfolioUrls.filter(
+    (url) => url.trim() !== "",
+  );
+  
+  // Sanitize tags (remove special characters)
+  payload.tags = payload.tags.map(tag => tag.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim());
     
     // Validate tier name uniqueness before submission
     const tierNames = payload.tiers.map(t => t.name?.trim().toLowerCase());

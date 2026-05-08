@@ -68,7 +68,40 @@
       </div>
     </div>
 
-    <!-- EXISTING BID BANNER — shown prominently when user already bid -->
+    <!-- NO-LOCATION GATE — shown when runner has no location on profile -->
+    <template v-if="!userHasLocation">
+      <div class="flex flex-1 flex-col items-center justify-center gap-5 px-6 py-10 text-center">
+        <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-cb-warning-subtle">
+          <i class="fa-solid fa-location-dot text-2xl text-cb-warning"></i>
+        </div>
+        <div>
+          <h4 class="text-base font-bold text-cb-text">Location required to bid</h4>
+          <p class="mt-1.5 max-w-xs text-sm text-cb-muted leading-relaxed">
+            Runners can only bid on errands within their own state and local government area.
+            Please set your location on your profile before placing a bid.
+          </p>
+        </div>
+        <router-link
+          to="/user/profile"
+          class="inline-flex items-center gap-2 rounded-xl bg-cb-accent px-6 py-3 text-sm font-bold text-cb-contrast transition-opacity hover:opacity-85"
+          @click="$emit('close')"
+        >
+          <i class="fa-solid fa-user-pen text-xs"></i>
+          Update my profile
+        </router-link>
+      </div>
+      <div class="border-t border-cb-divider bg-cb-card/30 px-6 py-4">
+        <button
+          @click="$emit('close')"
+          class="w-full rounded-xl border border-cb-divider bg-cb-card px-4 py-3 text-sm font-semibold text-cb-text hover:bg-cb-field"
+        >
+          Close
+        </button>
+      </div>
+    </template>
+
+    <!-- FORM (only shown when user has location) -->
+    <template v-else>
     <div
       v-if="hasUserBid && existingBid"
       class="mx-6 mt-4 rounded-xl border border-cb-warning/40 bg-cb-warning-subtle p-4"
@@ -234,6 +267,7 @@
         Bid already placed
       </div>
     </div>
+    </template><!-- /v-else userHasLocation -->
   </div>
 </template>
 
@@ -247,6 +281,7 @@ const props = defineProps({
   error: String,
   hasUserBid: Boolean,
   existingBid: Object,
+  userHasLocation: { type: Boolean, default: true },
 });
 
 const emit = defineEmits(["submit", "close"]);

@@ -11,7 +11,7 @@
             <p class="page-label">About Us</p>
             <h1 class="page-title">Unlocking opportunity within campus ecosystems.</h1>
             <p class="page-sub">
-              CampusBaze was created on a simple belief: there is enormous talent within campuses,
+              Campus Baze was created on a simple belief: there is enormous talent within campuses,
               there are everyday problems that need solving, and when the right people are connected,
               opportunity begins to circulate.
             </p>
@@ -27,10 +27,10 @@
           <div class="hero-images">
             <div class="img-stack">
               <div class="img-main">
-                <img src="@/assets/img/heroImg-1.jpg" alt="Students collaborating on campus" />
+                <img src="@/assets/img/publicImages/about_us_img_1.png" alt="Students collaborating on campus" />
               </div>
               <div class="img-secondary">
-                <img src="@/assets/img/heroImg-2.jpg" alt="Campus community connecting" />
+                <img src="@/assets/img/publicImages/about_us_img_2.png" alt="Campus community connecting" />
               </div>
               <!-- Floating accent -->
               <div class="img-badge">
@@ -54,9 +54,9 @@
           </div>
           <div class="prose-block">
             <p>
-              CampusBaze provides the structure that allows talent and need to connect fairly,
+              Campus Baze provides the structure that allows talent and need to connect fairly,
               safely, and efficiently. Whether you need something done quickly or you're looking
-              to earn by offering your skills, CampusBaze brings the right people together.
+              to earn by offering your skills, Campus Baze brings the right people together.
             </p>
             <p>
               We are not just a marketplace. We are a trust layer built specifically for campus
@@ -153,9 +153,9 @@ const whatWeDo = [
 ]
 
 const values = [
-  { title: 'Trust', desc: 'Every feature we build is designed to make users feel safe. From verified profiles to escrow payments, trust is the foundation of CampusBaze.' },
-  { title: 'Fairness', desc: 'We believe in fair exchange. Whether you are earning or spending, CampusBaze ensures both sides of every transaction are protected.' },
-  { title: 'Efficiency', desc: 'Campus life moves fast. CampusBaze is built to match that pace  making it easy to post, connect, and complete tasks without friction.' },
+  { title: 'Trust', desc: 'Every feature we build is designed to make users feel safe. From verified profiles to escrow payments, trust is the foundation of Campus Baze.' },
+  { title: 'Fairness', desc: 'We believe in fair exchange. Whether you are earning or spending, Campus Baze ensures both sides of every transaction are protected.' },
+  { title: 'Efficiency', desc: 'Campus life moves fast. Campus Baze is built to match that pace  making it easy to post, connect, and complete tasks without friction.' },
   { title: 'Community', desc: 'We exist to strengthen campus communities by circulating opportunity and talent within them, not extracting it.' },
 ]
 
@@ -169,7 +169,7 @@ const ctaTitle = computed(() => {
 const ctaSubtitle = computed(() => {
   return authStore.isAuthenticated
     ? 'Head to your dashboard to post an errand, offer a service, or manage your tasks.'
-    : 'Join thousands of students already using CampusBaze to get things done and earn on their own terms.'
+    : 'Join thousands of students already using Campus Baze to get things done and earn on their own terms.'
 })
 
 const primaryCtaText = computed(() => {

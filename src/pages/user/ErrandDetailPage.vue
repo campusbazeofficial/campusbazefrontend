@@ -139,10 +139,16 @@
                 </button>
 
                 <!-- posted → runner bid -->
-                <button v-if="!isMyErrand && errand.status === 'posted' && !hasUserBid" @click="showBidModal = true"
+                <button v-if="!isMyErrand && errand.status === 'posted' && !hasUserBid && userHasLocation" @click="showBidModal = true"
                   class="flex w-full items-center justify-center gap-2 rounded-xl bg-cb-accent py-3 text-sm font-semibold text-cb-contrast transition-all hover:bg-cb-accent-dark ">
                   <i class="fa-solid fa-gavel"></i> Place a bid
                 </button>
+
+                <!-- posted → runner no location -->
+                <router-link v-else-if="!isMyErrand && errand.status === 'posted' && !hasUserBid && !userHasLocation" to="/user/profile"
+                  class="flex w-full items-center justify-center gap-2 rounded-xl border border-cb-warning/40 bg-cb-warning-subtle py-3 text-sm font-semibold text-cb-warning transition-all hover:opacity-85">
+                  <i class="fa-solid fa-location-dot text-xs"></i> Set your location to bid
+                </router-link>
 
                 <!-- posted → runner awaiting -->
                 <div v-else-if="!isMyErrand && hasUserBid && errand.status === 'posted'" class="space-y-2">
@@ -453,7 +459,16 @@
     <Teleport to="body">
       <Transition name="overlay">
         <div v-if="showBidModal" class="fixed inset-0 z-[300] flex items-end justify-center bg-cb-overlay p-0 backdrop-blur-sm sm:items-center sm:p-4" @click.self="showBidModal = false">
-          <BidModal :errand="errand" :loading="errandStore.actionLoading" :error="bidError" @submit="handleBid" @close="showBidModal = false" />
+          <BidModal
+            :errand="errand"
+            :loading="errandStore.actionLoading"
+            :error="bidError"
+            :has-user-bid="hasUserBid"
+            :existing-bid="errand?.bids?.find(b => isCurrentUserBid(b) && !['withdrawn','rejected'].includes(b.status)) ?? null"
+            :user-has-location="userHasLocation"
+            @submit="handleBid"
+            @close="showBidModal = false"
+          />
         </div>
       </Transition>
     </Teleport>
@@ -537,6 +552,11 @@ const canDispute = computed(() => {
 const canChat = computed(() => {
   if (!errand.value || !['accepted', 'in_progress', 'completed'].includes(errand.value.status)) return false
   return isMyErrand.value || isAcceptedRunner.value
+})
+// Runner must have a location set to be eligible to bid
+const userHasLocation = computed(() => {
+  const loc = userStore.user?.location
+  return !!(loc?.state && loc?.localGovt)
 })
 const chatPartnerName = computed(() => {
   if (!errand.value) return ''
@@ -684,6 +704,23 @@ watch(errand, (e) => {
   reviewRating.value = 0; reviewComment.value = ''; reviewSubmitted.value = false; existingReview.value = null
   if (e?.status === 'confirmed' && isMyErrand.value) fetchExistingReview()
 })
+
+// When an admin resolves a dispute in the poster's favour the errand moves
+// back to `posted` — all bids reset to pending and a new runner can be chosen.
+// Detect this transition and immediately reload so no stale runner/bid data lingers.
+watch(
+  () => errand.value?.status,
+  (newStatus, oldStatus) => {
+    if (newStatus === 'posted' && oldStatus === 'disputed') {
+      load()
+      if (isMyErrand.value) {
+        toast.success('Dispute resolved in your favour — your errand has been re-opened.')
+      } else {
+        toast.warning('The dispute was resolved. This errand has been re-opened for new bids.')
+      }
+    }
+  }
+)
 </script>
 
 <style scoped>

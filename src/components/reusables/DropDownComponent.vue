@@ -30,16 +30,18 @@
     <Teleport to="body">
       <Transition name="dd-fade">
         <div
-          v-if="isOpen"
-          ref="menuRef"
-          class="fixed z-[9999] bg-cb-card border border-cb-divider rounded-xl shadow-2xl overflow-hidden outline-none"
-          :style="menuStyle"
-          role="menu"
-          @keydown.escape.prevent="close"
-          @keydown.tab="close"
-        >
-          <slot />
-        </div>
+  v-if="isOpen"
+  ref="menuRef"
+  class="fixed z-[9999] bg-cb-card border border-cb-divider rounded-xl shadow-2xl overflow-hidden outline-none"
+  :style="menuStyle"
+  role="menu"
+  @keydown.escape.prevent="close"
+  @keydown.tab="close"
+>
+  <div class="overflow-y-auto max-h-80 dropdown-menu-content">
+    <slot />
+  </div>
+</div>
       </Transition>
     </Teleport>
   </div>
@@ -134,12 +136,13 @@ function onDocClick(e) {
   if (!inRoot && !inMenu) close()
 }
 
-function onScroll() {
+function onScroll(e) {
   if (!isOpen.value) return
+  // Don't close if scrolling inside the dropdown menu
+  if (menuRef.value?.contains(e.target)) return
   if (props.closeOnScroll) close()
   else reposition()
 }
-
 function onResize() {
   if (isOpen.value) reposition()
 }
@@ -170,5 +173,15 @@ defineExpose({ open, close, toggle, isOpen })
 .dd-fade-leave-to {
   opacity: 0;
   transform: translateY(-4px) scale(0.98);
+}
+.dropdown-menu-content::-webkit-scrollbar {
+  width: 4px;
+}
+.dropdown-menu-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dropdown-menu-content::-webkit-scrollbar-thumb {
+  background: var(--color-cb-divider);
+  border-radius: 4px;
 }
 </style>

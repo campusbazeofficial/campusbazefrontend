@@ -5,7 +5,7 @@
       <!-- Dark overlay -->
       <div class="hero-overlay"></div>
 
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 relative z-10">
         <!-- Header -->
         <div class="hero-header">
           <h1 class="page-title">Contact Us</h1>
@@ -35,7 +35,7 @@
             <!-- Social -->
             <div class="social-row">
               <a
-                href="https://www.facebook.com/share/p/1AbVjoP32M/"
+                href="https://www.facebook.com/61555774271352/posts/122111110616192475/?app=fbl"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="social-btn"
@@ -44,7 +44,7 @@
                 <i class="fa-brands fa-facebook-f"></i>
               </a>
               <a
-                href="https://x.com/i/status/2043723306931474875"
+                href="https://x.com/i/status/2043001280365310172"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="social-btn"
@@ -53,7 +53,7 @@
                 <i class="fa-brands fa-x-twitter"></i>
               </a>
               <a
-                href="https://www.instagram.com/p/DXE_Vo3DSFm/"
+                href="https://www.instagram.com/campus_baze?igsh=MXFrNm1vMHR4c2I5Zg=="
                 target="_blank"
                 rel="noopener noreferrer"
                 class="social-btn"
@@ -62,13 +62,22 @@
                 <i class="fa-brands fa-instagram"></i>
               </a>
               <a
-                href="https://www.linkedin.com/posts/campus-baze_campusbaze-knowyourworth-skillbasedincome-activity-7449489345360592897-EX8o?utm_source=share&utm_medium=member_android&rcm=ACoAAGBTErIBcUEPCEFQSFpiyZ3vqGiO2uR_H1g"
+                href="https://t.me/campusbazers1"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="social-btn"
-                aria-label="LinkedIn"
+                aria-label="Telegram"
               >
-                <i class="fa-brands fa-linkedin-in"></i>
+                <i class="fa-brands fa-telegram"></i>
+              </a>
+              <a
+                href="https://www.tiktok.com/@campusbaze?_r=1&_t=ZS-96AUORqfjuu"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="social-btn"
+                aria-label="TikTok"
+              >
+                <i class="fa-brands fa-tiktok"></i>
               </a>
             </div>
           </div>
@@ -114,11 +123,18 @@
                 ></textarea>
               </div>
 
-              <button type="submit" class="submit-btn" :disabled="submitted">
-                <span v-if="!submitted">Send Message</span>
-                <span v-else class="success-msg">
+              <p v-if="formError" class="form-error">
+                <i class="fa-solid fa-circle-exclamation"></i> {{ formError }}
+              </p>
+
+              <button type="submit" class="submit-btn" :disabled="submitting || submitted">
+                <span v-if="submitting" class="success-msg">
+                  <i class="fa-solid fa-spinner fa-spin"></i> Sending…
+                </span>
+                <span v-else-if="submitted" class="success-msg">
                   <i class="fa-solid fa-check"></i> Message sent!
                 </span>
+                <span v-else>Send Message</span>
               </button>
             </form>
           </div>
@@ -133,16 +149,47 @@
 import { ref, defineComponent, h } from "vue";
 import ScrollToTop from "@/components/reusables/ScrollToTop.vue";
 
-const form = ref({ name: "", email: "", subject: "", message: "" });
-const submitted = ref(false);
+const FORMSPREE_URL = "https://formspree.io/f/xpqbjnqe";
 
-function handleSubmit() {
-  // Replace with actual API call
-  submitted.value = true;
-  setTimeout(() => {
-    submitted.value = false;
-    form.value = { name: "", email: "", subject: "", message: "" };
-  }, 3000);
+const form = ref({ name: "", email: "", subject: "", message: "" });
+const submitting = ref(false);
+const submitted = ref(false);
+const formError = ref("");
+
+async function handleSubmit() {
+  submitting.value = true;
+  formError.value = "";
+
+  try {
+    const response = await fetch(FORMSPREE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({
+        name: form.value.name,
+        email: form.value.email,
+        subject: form.value.subject,
+        message: form.value.message,
+      }),
+    });
+
+    if (response.ok) {
+      submitted.value = true;
+      form.value = { name: "", email: "", subject: "", message: "" };
+      // Reset success state after 4 seconds
+      setTimeout(() => {
+        submitted.value = false;
+      }, 4000);
+    } else {
+      const data = await response.json();
+      formError.value =
+        data?.errors?.[0]?.message ||
+        "Something went wrong. Please try again.";
+    }
+  } catch {
+    formError.value = "Network error. Please check your connection and try again.";
+  } finally {
+    submitting.value = false;
+  }
 }
 
 const IconLocation = defineComponent({
@@ -212,9 +259,9 @@ const IconEmail = defineComponent({
 });
 
 const contactItems = [
-  { label: "Address", value: "Lagos, Nigeria", icon: IconLocation },
-  { label: "Phone", value: "+234 800 000 0000", icon: IconPhone },
-  { label: "Email", value: "support@campusbaze.com", icon: IconEmail },
+  { label: "Address", value: " (1st floor left,) after St. Johns Hotel nodu Okpuno", icon: IconLocation },
+  { label: "Phone", value: "+234 701 567 6490", icon: IconPhone },
+  { label: "Email", value: "campusbazeofficial@gmail.com", icon: IconEmail },
 ];
 </script>
 
@@ -225,7 +272,7 @@ const contactItems = [
 .contact-hero {
   position: relative;
   min-height: 100vh;
-  background-image: url("@/assets/img/heroImg-1.jpg");
+  background-image: url("@/assets/img/publicImages/contact_img.png");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -441,5 +488,14 @@ const contactItems = [
   align-items: center;
   justify-content: center;
   gap: 8px;
+}
+
+.form-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #ef4444;
+  margin: 0;
 }
 </style>

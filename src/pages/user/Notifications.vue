@@ -567,15 +567,14 @@ async function handleDelete() {
   try {
     await notificationStore.deleteNotification(notificationToDelete.value._id)
     showToast('Notification deleted', 'success')
-    showDeleteModal.value = false
-    notificationToDelete.value = null
   } catch {
     showToast('Failed to delete', 'error')
   } finally {
     deleting.value = false
+    showDeleteModal.value = false
+    notificationToDelete.value = null
   }
 }
-
 async function loadMore() {
   if (loadingMore.value || !notificationStore.meta?.hasNextPage) return
   loadingMore.value = true

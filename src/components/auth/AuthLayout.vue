@@ -6,7 +6,7 @@
       <div class="auth-top-bar">
         <router-link to="/" class="auth-logo">
           <img
-            src="@/assets/img/campusBaseLogo-light.png"
+            src="@/assets/img/campusBaseLogo-light-form.png"
             alt="CampusBase Logo"
             class="h-8 w-auto object-contain"
           />

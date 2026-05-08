@@ -167,6 +167,22 @@
           </button>
         </div>
 
+        <!-- Location filter toggle -->
+        <button
+          type="button"
+          :class="[
+            'inline-flex w-full sm:w-auto items-center justify-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all',
+            hasLocationFilter || showLocation
+              ? 'border-cb-accent bg-cb-accent-subtle text-cb-accent'
+              : 'border-cb-divider bg-cb-card text-cb-muted hover:border-cb-accent-muted hover:text-cb-text',
+          ]"
+          @click="showLocation = !showLocation"
+        >
+          <i class="fa-solid fa-location-dot text-[10px]"></i>
+          <span v-if="hasLocationFilter">{{ locationSummary }}</span>
+          <span v-else>Location</span>
+        </button>
+
         <!-- Price range toggle -->
         <button
           type="button"
@@ -248,6 +264,57 @@
           </div>
         </div>
       </Transition>
+      <!-- Location filter expander -->
+      <Transition name="slide-down">
+        <div
+          v-if="showLocation"
+          class="mt-3 rounded-xl border border-cb-divider bg-cb-card p-4"
+        >
+          <div class="mb-3 flex items-center justify-between">
+            <span class="text-xs font-semibold text-cb-text">Filter by location</span>
+            <button
+              v-if="hasLocationFilter"
+              type="button"
+              class="text-[10px] font-semibold text-cb-negative hover:opacity-75"
+              @click="clearLocation"
+            >
+              Clear
+            </button>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="flex flex-col gap-1">
+              <label class="text-[10px] font-semibold text-cb-muted">State</label>
+              <input
+                :value="filters.locationState"
+                type="text"
+                placeholder="e.g. Lagos"
+                class="w-full rounded-lg border border-cb-divider bg-cb-base px-2.5 py-1.5 text-xs text-cb-text focus:border-cb-accent focus:outline-none"
+                @input="onLocationInput('locationState', $event.target.value)"
+              />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-[10px] font-semibold text-cb-muted">Local Govt Area</label>
+              <input
+                :value="filters.locationLocalGovt"
+                type="text"
+                placeholder="e.g. Ikeja"
+                class="w-full rounded-lg border border-cb-divider bg-cb-base px-2.5 py-1.5 text-xs text-cb-text focus:border-cb-accent focus:outline-none"
+                @input="onLocationInput('locationLocalGovt', $event.target.value)"
+              />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-[10px] font-semibold text-cb-muted">Village / Area <span class="font-normal">(optional)</span></label>
+              <input
+                :value="filters.locationVillage"
+                type="text"
+                placeholder="e.g. Allen"
+                class="w-full rounded-lg border border-cb-divider bg-cb-base px-2.5 py-1.5 text-xs text-cb-text focus:border-cb-accent focus:outline-none"
+                @input="onLocationInput('locationVillage', $event.target.value)"
+              />
+            </div>
+          </div>
+        </div>
+      </Transition>
     </div>
   </section>
 </template>
@@ -301,6 +368,7 @@ const SORT_OPTIONS = [
 // ─── Local UI state ───────────────────────────────────────────
 const sortOpen = ref(false);
 const showPriceRange = ref(false);
+const showLocation = ref(false);
 const sortRef = ref(null);
 
 // ─── Derived ─────────────────────────────────────────────────
@@ -313,6 +381,15 @@ const hasPriceRange = computed(
     props.priceRange.min > 0 ||
     (props.priceRange.max !== null && Number.isFinite(props.priceRange.max)),
 );
+
+const hasLocationFilter = computed(
+  () => !!(props.filters.locationState || props.filters.locationLocalGovt || props.filters.locationVillage)
+);
+
+const locationSummary = computed(() => {
+  return [props.filters.locationState, props.filters.locationLocalGovt, props.filters.locationVillage]
+    .filter(Boolean).join(', ');
+});
 
 // ─── Helpers: patch only the changed key ─────────────────────
 function patchFilter(key, val) {
@@ -340,7 +417,9 @@ function selectCategory(val) {
 
 // ─── Budget type ─────────────────────────────────────────────
 function selectBudget(val) {
-  patchFilter("budgetType", val);
+  // clicking the already-active option deselects it (back to "All")
+  const next = props.filters.budgetType === val ? "" : val;
+  patchFilter("budgetType", next);
   emit("filter");
 }
 
@@ -349,6 +428,24 @@ function selectSort(val) {
   patchFilter("sort", val);
   sortOpen.value = false;
   emit("filter");
+}
+
+// ─── Location ─────────────────────────────────────────────────
+let locationTimer = null;
+function onLocationInput(key, val) {
+  patchFilter(key, val);
+  clearTimeout(locationTimer);
+  locationTimer = setTimeout(() => emit('filter'), 400);
+}
+
+function clearLocation() {
+  emit('update:filters', {
+    ...props.filters,
+    locationState: '',
+    locationLocalGovt: '',
+    locationVillage: '',
+  });
+  emit('filter');
 }
 
 // ─── Price range (controlled, sanitised) ─────────────────────

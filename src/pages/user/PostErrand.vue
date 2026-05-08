@@ -25,18 +25,18 @@
         <div class="rounded-xl bg-cb-field/40 p-4 border border-cb-divider/50">
           <div class="flex items-center justify-between mb-2">
             <span class="text-[9px] font-bold uppercase text-cb-muted">Balance</span>
-            <span :class="['text-xs font-bold', cbcBalance > 0 ? 'text-cb-positive' : 'text-cb-negative']">
-              {{ cbcBalance.toLocaleString() }} CBC
+            <span :class="['text-xs font-bold', !isLoadingData && cbcBalance > 0 ? 'text-cb-positive' : !isLoadingData ? 'text-cb-negative' : 'text-cb-muted']">
+              {{ isLoadingData ? '—' : cbcBalance.toLocaleString() + ' CBC' }}
             </span>
           </div>
           <div class="flex justify-between text-[9px] pt-2 border-t border-cb-divider/30">
             <span class="text-cb-muted">CBC Contact Fee</span>
-            <span :class="['font-bold', cbcBlocked || cbcWarning ? 'text-cb-negative' : 'text-cb-accent']">{{ errandPostingCost || '—' }} CBC</span>
+            <span :class="['font-bold', !isLoadingData && (cbcBlocked || cbcWarning) ? 'text-cb-negative' : 'text-cb-accent']">{{ isLoadingData ? '—' : (errandPostingCost || '—') + ' CBC' }}</span>
           </div>
-          <div v-if="cbcBlocked" class="mt-2 text-[9px] font-semibold text-cb-negative">
+          <div v-if="!isLoadingData && cbcBlocked" class="mt-2 text-[9px] font-semibold text-cb-negative">
             ✕ No CBC — top up to post
           </div>
-          <div v-else-if="cbcWarning" class="mt-2 text-[9px] font-semibold text-amber-500">
+          <div v-else-if="!isLoadingData && cbcWarning" class="mt-2 text-[9px] font-semibold text-amber-500">
             ⚠ Need {{ cbcShortfall }} more CBC
           </div>
         </div>
@@ -56,17 +56,18 @@
         <div class="flex items-center gap-3 px-4 py-3 sm:px-12">
           <div class="flex flex-1 flex-col border-r border-cb-divider pr-3">
             <span class="text-[8px] font-bold uppercase tracking-widest text-cb-muted">Balance</span>
-            <span :class="['text-xs font-bold', cbcBalance > 0 ? 'text-cb-positive' : 'text-cb-negative']">
-              {{ cbcBalance.toLocaleString() }} CBC
+            <span :class="['text-xs font-bold', !isLoadingData && cbcBalance > 0 ? 'text-cb-positive' : !isLoadingData ? 'text-cb-negative' : 'text-cb-muted']">
+              {{ isLoadingData ? '—' : cbcBalance.toLocaleString() + ' CBC' }}
             </span>
           </div>
           <div class="flex flex-1 flex-col border-r border-cb-divider pr-3">
             <span class="text-[8px] font-bold uppercase tracking-widest text-cb-muted">CBC Fee (upfront)</span>
-            <span :class="['text-xs font-bold', cbcBlocked || cbcWarning ? 'text-cb-negative' : 'text-cb-accent']">{{ errandPostingCost || '—' }} CBC</span>
+            <span :class="['text-xs font-bold', !isLoadingData && (cbcBlocked || cbcWarning) ? 'text-cb-negative' : 'text-cb-accent']">{{ isLoadingData ? '—' : (errandPostingCost || '—') + ' CBC' }}</span>
           </div>
           <div class="flex flex-1 flex-col">
             <span class="text-[8px] font-bold uppercase tracking-widest text-cb-muted">Status</span>
-            <span v-if="cbcBlocked" class="text-[9px] font-bold text-cb-negative">No CBC balance</span>
+            <span v-if="isLoadingData" class="text-[9px] italic text-cb-muted">Loading...</span>
+            <span v-else-if="cbcBlocked" class="text-[9px] font-bold text-cb-negative">No CBC balance</span>
             <span v-else-if="cbcWarning" class="text-[9px] font-bold text-amber-500">Need {{ cbcShortfall }} more</span>
             <span v-else class="text-[9px] italic leading-tight text-cb-muted">Sufficient balance</span>
           </div>
@@ -91,7 +92,7 @@
       <div class="mx-auto max-w-lg">
 
         <!-- ── CBC blocked banner ── -->
-        <div v-if="cbcBlocked" class="mb-5 flex items-start gap-3 rounded-2xl border border-cb-negative/40 bg-cb-negative/8 px-4 py-4">
+        <div v-if="!isLoadingData && cbcBlocked" class="mb-5 flex items-start gap-3 rounded-2xl border border-cb-negative/40 bg-cb-negative/8 px-4 py-4">
           <i class="fa-solid fa-circle-xmark mt-0.5 shrink-0 text-cb-negative"></i>
           <div class="min-w-0">
             <p class="text-sm font-bold text-cb-negative">You have no CBC balance</p>
@@ -104,7 +105,7 @@
         </div>
 
         <!-- ── CBC low-balance warning ── -->
-        <div v-else-if="cbcWarning" class="mb-5 flex items-start gap-3 rounded-2xl border border-amber-400/40 bg-amber-400/8 px-4 py-4">
+        <div v-else-if="!isLoadingData && cbcWarning" class="mb-5 flex items-start gap-3 rounded-2xl border border-amber-400/40 bg-amber-400/8 px-4 py-4">
           <i class="fa-solid fa-triangle-exclamation mt-0.5 shrink-0 text-amber-500"></i>
           <div class="min-w-0">
             <p class="text-sm font-bold text-amber-600">Insufficient CBC for this errand</p>
@@ -118,7 +119,7 @@
 
         <form @submit.prevent="handleSubmit">
           <!-- Blocked overlay -->
-          <div :class="cbcBlocked ? 'pointer-events-none select-none opacity-40' : ''">
+          <div :class="!isLoadingData && cbcBlocked ? 'pointer-events-none select-none opacity-40' : ''">
           <div class="relative min-h-[400px]">
             <Transition name="step-slide" mode="out-in">
               <div :key="currentStep">
@@ -241,6 +242,34 @@
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div class="group">
+                        <label class="block text-[10px] font-bold uppercase text-cb-muted mb-1.5 ml-1">State <span class="text-cb-negative">*</span></label>
+                        <div class="bg-cb-field rounded-md">
+                          <input v-model.trim="form.locationState" type="text" placeholder="e.g. Lagos" :class="['w-full rounded-xl border text-cb-text placeholder:text-cb-muted bg-cb-base px-4 py-3 text-sm font-medium outline-none focus:border-cb-accent transition-all', errors.value?.locationState ? 'border-cb-negative/60 bg-cb-negative-subtle' : 'border-cb-divider']" @input="errors.value && (errors.value.locationState = '')" />
+                        </div>
+                        <p v-if="errors.value?.locationState" class="mt-1 flex items-center gap-1 text-[10px] font-semibold text-cb-negative">
+                          <i class="fa-solid fa-circle-exclamation text-[9px]"></i>{{ errors.value.locationState }}
+                        </p>
+                      </div>
+                      <div class="group">
+                        <label class="block text-[10px] font-bold uppercase text-cb-muted mb-1.5 ml-1">Local Govt Area <span class="text-cb-negative">*</span></label>
+                        <div class="bg-cb-field rounded-md">
+                          <input v-model.trim="form.locationLocalGovt" type="text" placeholder="e.g. Ikeja" :class="['w-full rounded-xl border text-cb-text placeholder:text-cb-muted bg-cb-base px-4 py-3 text-sm font-medium outline-none focus:border-cb-accent transition-all', errors.value?.locationLocalGovt ? 'border-cb-negative/60 bg-cb-negative-subtle' : 'border-cb-divider']" @input="errors.value && (errors.value.locationLocalGovt = '')" />
+                        </div>
+                        <p v-if="errors.value?.locationLocalGovt" class="mt-1 flex items-center gap-1 text-[10px] font-semibold text-cb-negative">
+                          <i class="fa-solid fa-circle-exclamation text-[9px]"></i>{{ errors.value.locationLocalGovt }}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div class="group">
+                      <label class="block text-[10px] font-bold uppercase text-cb-muted mb-1.5 ml-1">Village / Area <span class="text-cb-muted font-normal normal-case">(optional)</span></label>
+                      <div class="bg-cb-field rounded-md">
+                        <input v-model.trim="form.locationVillage" type="text" placeholder="e.g. Allen" class="w-full rounded-xl border border-cb-divider text-cb-text placeholder:text-cb-muted bg-cb-base px-4 py-3 text-sm font-medium outline-none focus:border-cb-accent transition-all" />
+                      </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label class="block text-[10px] font-bold uppercase text-cb-muted mb-1.5 ml-1">Date (DD/MM/YYYY)</label>
                       <div class="bg-cb-field rounded-md ">
@@ -309,6 +338,7 @@ const { success, error, warning } = useToast();
 
 const currentStep = ref(1);
 const errors = ref({});
+const isLoadingData = ref(true);
 
 const steps = [
   { id: 1, name: "Brief" },
@@ -337,6 +367,9 @@ const form = ref({
   budget: 500,
   budgetType: "fixed",
   address: "",
+  locationState: "",
+  locationLocalGovt: "",
+  locationVillage: "",
   rawDate: "",
   rawTime: "",
   period: "AM",
@@ -369,6 +402,8 @@ const validateLogistics = () => {
   const timeRegex = /^(0[1-9]|1[0-2]):[0-5][0-9]$/;
 
   if (!form.value.address) return "Address required.";
+  if (!form.value.locationState) return "State is required.";
+  if (!form.value.locationLocalGovt) return "Local Government Area is required.";
   if (!dateRegex.test(form.value.rawDate)) return "Invalid date format.";
   if (!timeRegex.test(form.value.rawTime)) return "Invalid time format.";
 
@@ -419,11 +454,11 @@ const errandPostingCost = computed(() => {
   return getFinalCbcFee(budget, isStudentVerified.value, cbcDiscount.value);
 });
 
-// CBC balance status
+// CBC balance status — all gated on isLoadingData to prevent flash-of-error on mount
 const cbcBalance   = computed(() => walletStore.cbcBalance ?? 0);
-const cbcBlocked   = computed(() => cbcBalance.value <= 0);
+const cbcBlocked   = computed(() => !isLoadingData.value && cbcBalance.value <= 0);
 const cbcShortfall = computed(() => Math.max(0, errandPostingCost.value - cbcBalance.value));
-const cbcWarning   = computed(() => !cbcBlocked.value && cbcShortfall.value > 0);
+const cbcWarning   = computed(() => !isLoadingData.value && !cbcBlocked.value && cbcShortfall.value > 0);
 
 // ── Inline validation helpers ─────────────────────────────────────
 function validateStep1() {
@@ -468,11 +503,14 @@ const nextStep = () => {
 const prevStep = () => { if (currentStep.value > 1) currentStep.value--; };
 
 const canSubmit = computed(() => {
-  return !cbcBlocked.value &&
+  return !isLoadingData.value &&
+         !cbcBlocked.value &&
          !cbcWarning.value &&
          form.value.title &&
          form.value.category &&
          form.value.budget >= 500 &&
+         form.value.locationState &&
+         form.value.locationLocalGovt &&
          !validateLogistics();
 });
 
@@ -498,7 +536,12 @@ const handleSubmit = async () => {
       budget: form.value.budget,
       budgetType: form.value.budgetType,
       address: form.value.address,
-      deadline 
+      deadline,
+      location: {
+        state: form.value.locationState,
+        localGovt: form.value.locationLocalGovt,
+        ...(form.value.locationVillage && { village: form.value.locationVillage }),
+      },
     });
     
     success("Errand Posted!");
@@ -508,9 +551,13 @@ const handleSubmit = async () => {
   }
 };
 
-onMounted(() => {
-  walletStore.fetchBalance();
-  subscriptionStore.initialize();
+onMounted(async () => {
+  isLoadingData.value = true;
+  await Promise.allSettled([
+    walletStore.fetchBalance(),
+    subscriptionStore.initialize(),
+  ]);
+  isLoadingData.value = false;
 });
 </script>
 

@@ -3,51 +3,39 @@
   <div class="min-h-screen bg-cb-base">
 
     <!-- ───── HERO ───── -->
-    <section class="relative overflow-hidden  pb-10 pt-14 sm:pb-14 sm:pt-20">
-
-      <!-- Layered background -->
-      <div class="pointer-events-none absolute inset-0">
-        <!-- Main orb -->
-        <div class="absolute left-1/2 top-0 size-[min(600px,90vw)] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[80px]"
-          style="background: radial-gradient(circle, color-mix(in srgb, var(--color-cb-accent) 18%, transparent), transparent 70%)" />
-        <!-- Secondary orb -->
-        <div class="absolute -bottom-20 -right-10 size-[min(280px,60vw)] rounded-full blur-[80px]"
-          style="background: radial-gradient(circle, color-mix(in srgb, var(--color-cb-accent) 8%, transparent), transparent 70%)" />
-        <!-- Grid -->
-        <div class="absolute inset-0 opacity-35"
-          style="
-            background-image: linear-gradient(var(--color-cb-divider) 1px, transparent 1px), linear-gradient(90deg, var(--color-cb-divider) 1px, transparent 1px);
-            background-size: 40px 40px;
-            mask-image: radial-gradient(ellipse 80% 80% at 50% 0%, black, transparent);
-          " />
-      </div>
+    <section
+      class="relative overflow-hidden pb-10 pt-14 sm:pb-14 sm:pt-20"
+      :style="{ backgroundImage: `url(${heroImg1})`, backgroundSize: 'cover', backgroundPosition: 'bottom', backgroundRepeat: 'no-repeat' }"
+    >
+      <!-- Dark overlay so text stays readable -->
+      <div class="pointer-events-none absolute inset-0 bg-black/55" />
 
       <!-- Content -->
-      <div class="relative mx-auto flex max-w-7xl flex-col items-center gap-4 text-center ">
+      <div class="relative mx-auto flex max-w-7xl flex-col items-center gap-4 text-center px-4 sm:px-6">
 
         <!-- Badge -->
-        <div class="inline-flex items-center gap-2 rounded-full border border-cb-accent-muted bg-cb-accent-subtle px-4 py-1.5 text-[10px] font-bold tracking-widest text-cb-accent uppercase">
-          <span class="size-1.5 animate-pulse rounded-full bg-cb-accent" />
+        <div class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-[10px] font-bold tracking-widest text-white uppercase backdrop-blur-sm">
+          <span class="size-1.5 animate-pulse rounded-full bg-white" />
           Subscription Plans
         </div>
 
-        <h1 class=" text-[clamp(1.5rem,4.5vw,3rem)] leading-[1.1] tracking-tight text-cb-text">
+        <h1 class="text-[clamp(1.5rem,4.5vw,3rem)] leading-[1.1] tracking-tight text-white">
           The right plan,<br>
           <span class="text-cb-accent">right now.</span>
         </h1>
 
-        <p class="m-0 max-w-xs md:max-w-md  text-sm leading-relaxed text-cb-muted sm:text-base">
+        <p class="m-0 max-w-xs text-sm leading-relaxed text-white/75 sm:text-base md:max-w-md">
           Start free. Upgrade when you're ready. No hidden fees, cancel anytime.
         </p>
 
         <!-- Billing toggle -->
-        <div class="mt-2 flex items-center gap-3 rounded-full border border-cb-divider bg-cb-card px-4 py-2">
-          <span :class="['text-sm font-semibold transition-colors', billingPeriod === 'monthly' ? 'text-cb-text' : 'text-cb-muted']">
+        <div class="mt-2 flex items-center gap-3 rounded-full border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-sm">
+          <span :class="['text-sm font-semibold transition-colors', billingPeriod === 'monthly' ? 'text-white' : 'text-white/50']">
             Monthly
           </span>
 
           <button
-            class="relative h-[26px] w-11 shrink-0 cursor-pointer rounded-full border border-cb-divider bg-cb-field transition-all duration-200"
+            class="relative h-[26px] w-11 shrink-0 cursor-pointer rounded-full border border-white/30 bg-white/20 transition-all duration-200"
             :class="billingPeriod === 'yearly' ? '!border-cb-accent !bg-cb-accent' : ''"
             @click="toggleBilling"
             aria-label="Switch billing period"
@@ -58,7 +46,7 @@
             />
           </button>
 
-          <span :class="['flex items-center gap-1.5 text-sm font-semibold transition-colors', billingPeriod === 'yearly' ? 'text-cb-text' : 'text-cb-muted']">
+          <span :class="['flex items-center gap-1.5 text-sm font-semibold transition-colors', billingPeriod === 'yearly' ? 'text-white' : 'text-white/50']">
             Yearly
             <span v-if="averageYearlySaving > 0"
               class="rounded-full bg-cb-accent-subtle px-2 py-0.5 text-[10px] font-bold text-cb-accent">
@@ -72,10 +60,10 @@
 
     <!-- ───── TABS ───── -->
     <nav v-if="dataFetched"
-      class="sticky top-0 z-20  bg-cb-base-96 backdrop-blur-md maxw-3xl px-12 flex items-center justify-center"
+      class="sticky top-0 z-20 bg-cb-base-96 backdrop-blur-md px-12 flex items-center justify-center"
       role="tablist"
     >
-      <div class="mx-auto flex max-w-5xl gap-0 overflow-x-auto  [scrollbar-width:none] sm:px-6 [&::-webkit-scrollbar]:hidden">
+      <div class="mx-auto flex max-w-5xl gap-0 overflow-x-auto [scrollbar-width:none] sm:px-6 [&::-webkit-scrollbar]:hidden">
         <button
           v-for="tab in tabs"
           :key="tab.value"
@@ -96,7 +84,7 @@
     </nav>
 
     <!-- ───── MAIN CONTENT ───── -->
-    <main class="mx-auto flex max-w-5xl flex-col gap-8  py-8 px-4 sm:py-12">
+    <main class="mx-auto flex max-w-5xl flex-col gap-8 py-8 px-4 sm:py-12">
 
       <!-- Skeleton loading -->
       <template v-if="isInitialLoading">
@@ -232,6 +220,7 @@
     </main>
 
     <ToastContainer />
+      <ScrollToTop />
   </div>
 </template>
 
@@ -244,6 +233,8 @@ import { normalizeRawPlan } from "@/utils/planNormalizer";
 import { toPlanViewModel } from "@/utils/planViewModel";
 import PlanCard from "@/components/subscription/PlanCard.vue";
 import ToastContainer from "@/components/reusables/ToastContainer.vue";
+import ScrollToTop         from '@/components/reusables/ScrollToTop.vue'
+import heroImg1 from "@/assets/img/publicImages/subscription_hero.png";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -340,8 +331,6 @@ onMounted(loadData);
 </script>
 
 <style scoped>
-/* Only keyframes and Vue transition classes remain — nothing expressible as Tailwind utilities */
-
 @keyframes shimmer {
   0%   { background-position: 100% 50%; }
   100% { background-position: 0%   50%; }
