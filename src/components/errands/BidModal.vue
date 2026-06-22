@@ -77,7 +77,7 @@
         <div>
           <h4 class="text-base font-bold text-cb-text">Location required to bid</h4>
           <p class="mt-1.5 max-w-xs text-sm text-cb-muted leading-relaxed">
-            Runners can only bid on errands within their own state and local government area.
+            Runners can only bid on errands within their own state.
             Please set your location on your profile before placing a bid.
           </p>
         </div>

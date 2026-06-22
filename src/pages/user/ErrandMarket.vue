@@ -192,7 +192,7 @@ const isPoster = (errand) => errandStore.isPoster(errand._id);
 // Whether the logged-in runner has a location set (required to bid)
 const userHasLocation = computed(() => {
   const loc = userStore.user?.location;
-  return !!(loc?.state && loc?.localGovt);
+  return !!(loc?.state);
 });
 
 // ── Bid modal (quick-bid from card) ───────────────────────────
@@ -213,9 +213,8 @@ async function handleBid({ amount, message }) {
     fetchErrands();
   } catch (err) {
     const status = err?.response?.status;
-    const msg = err?.response?.data?.message || "";
-    if (status === 403 && msg.toLowerCase().includes("local government")) {
-      bidError.value = "You can only bid on errands in your local government area.";
+    if (status === 403) {
+      bidError.value = "You can only bid on errands in your state.";
     } else {
       bidError.value = errandStore.error || "Failed to place bid";
     }
