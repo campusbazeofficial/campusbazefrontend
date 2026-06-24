@@ -165,11 +165,18 @@
                   </button>
                 </div>
 
-                <!-- posted → poster cancel -->
-                <button v-else-if="isMyErrand && errand.status === 'posted'" @click="confirmCancel" :disabled="errandStore.actionLoading"
-                  class="flex w-full items-center justify-center gap-2 rounded-xl border border-cb-negative/30 bg-cb-negative-subtle py-2.5 text-sm font-semibold text-cb-negative hover:opacity-90 disabled:opacity-60">
-                  <i class="fa-solid fa-xmark"></i> Cancel errand
-                </button>
+                <!-- posted → poster edit + cancel -->
+                <template v-else-if="isMyErrand && errand.status === 'posted'">
+                  <!-- Edit is only available while no bids exist -->
+                  <button v-if="!errand.bids?.length" @click="openEditModal" :disabled="errandStore.actionLoading"
+                    class="flex w-full items-center justify-center gap-2 rounded-xl border border-cb-divider bg-cb-card py-2.5 text-sm font-semibold text-cb-text transition-colors hover:border-cb-accent hover:bg-cb-accent-subtle hover:text-cb-accent disabled:opacity-60">
+                    <i class="fa-solid fa-pen-to-square text-xs"></i> Edit errand
+                  </button>
+                  <button @click="confirmCancel" :disabled="errandStore.actionLoading"
+                    class="flex w-full items-center justify-center gap-2 rounded-xl border border-cb-negative/30 bg-cb-negative-subtle py-2.5 text-sm font-semibold text-cb-negative hover:opacity-90 disabled:opacity-60">
+                    <i class="fa-solid fa-xmark"></i> Cancel errand
+                  </button>
+                </template>
 
                 <!-- accepted → poster pay -->
                 <button v-else-if="isMyErrand && errand.status === 'accepted' && !errand.escrowConfirmed" @click="handlePay" :disabled="payLoading"
@@ -481,6 +488,132 @@
       <DisputeModal v-if="showDisputeModal" :errand="errand" :loading="errandStore.actionLoading" :store-error="errandStore.error" @close="showDisputeModal = false" @confirm="handleDisputeConfirm" />
     </Teleport>
 
+    <!-- ─── Edit Errand Modal ────────────────────────────────── -->
+    <Teleport to="body">
+      <Transition name="overlay">
+        <div v-if="showEditModal"
+          class="fixed inset-0 z-[300] flex items-end justify-center bg-cb-overlay p-0 backdrop-blur-sm sm:items-center sm:p-4"
+          @click.self="showEditModal = false">
+          <div class="w-full max-w-lg overflow-hidden rounded-t-2xl border border-cb-divider bg-cb-card sm:rounded-2xl">
+            <!-- Header -->
+            <div class="flex items-center justify-between border-b border-cb-divider px-5 py-4">
+              <div>
+                <h2 class="text-base font-bold text-cb-text">Edit Errand</h2>
+                <p class="mt-0.5 text-xs text-cb-muted">Only available before any runner places a bid.</p>
+              </div>
+              <button @click="showEditModal = false" class="flex h-8 w-8 items-center justify-center rounded-xl border border-cb-divider bg-cb-base text-cb-muted hover:text-cb-text">
+                <i class="fa-solid fa-xmark text-sm"></i>
+              </button>
+            </div>
+
+            <!-- Form -->
+            <div class="max-h-[70vh] overflow-y-auto px-5 py-4 space-y-4">
+              <!-- Title -->
+              <div>
+                <label class="mb-1.5 block text-xs font-semibold text-cb-muted">Title</label>
+                <div class="bg-cb-field rounded-md">
+                   <input v-model="editForm.title" type="text" maxlength="120" placeholder="What needs to be done?"
+                  class="w-full rounded-xl border border-cb-divider bg-cb-base px-3.5 py-2.5 text-sm text-cb-text placeholder:text-cb-muted-40 focus:border-cb-accent focus:outline-none" />
+                </div>
+               
+              </div>
+
+              <!-- Description -->
+              <div>
+                <label class="mb-1.5 block text-xs font-semibold text-cb-muted">Description</label>
+                <textarea v-model="editForm.description" rows="3" maxlength="1000" placeholder="Provide more details…"
+                  class="w-full resize-none rounded-xl border border-cb-divider bg-cb-base px-3.5 py-2.5 text-sm text-cb-text placeholder:text-cb-muted-40 focus:border-cb-accent focus:outline-none"></textarea>
+              </div>
+
+              <!-- Budget type + amount -->
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="mb-1.5 block text-xs font-semibold text-cb-muted">Budget type</label>
+                  <select v-model="editForm.budgetType"
+                    class="w-full rounded-xl border border-cb-divider bg-cb-base px-3.5 py-2.5 text-sm text-cb-text focus:border-cb-accent focus:outline-none">
+                    <option value="fixed">Fixed</option>
+                    <option value="negotiable">Negotiable</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-xs font-semibold text-cb-muted">Budget (₦)</label>
+                  <div class="bg-cb-field rounded-md">
+
+                  <input v-model.number="editForm.budget" type="number" min="0" placeholder="e.g. 5000"
+                    class="w-full rounded-xl border border-cb-divider bg-cb-base px-3.5 py-2.5 text-sm text-cb-text placeholder:text-cb-muted-40 focus:border-cb-accent focus:outline-none" />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Address -->
+              <div>
+                <label class="mb-1.5 block text-xs font-semibold text-cb-muted">Address</label>
+                <div class="bg-cb-field rounded-md">
+                <input v-model="editForm.address" type="text" placeholder="Street address or landmark"
+                  class="w-full rounded-xl border border-cb-divider bg-cb-base px-3.5 py-2.5 text-sm text-cb-text placeholder:text-cb-muted-40 focus:border-cb-accent focus:outline-none" />
+                  </div>  
+              </div>
+
+              <!-- Deadline -->
+              <div>
+                <label class="mb-1.5 block text-xs font-semibold text-cb-muted">Deadline</label>
+                <div class="bg-cb-field rounded-md">
+                <input v-model="editForm.deadline" type="datetime-local"
+                  class="w-full rounded-xl border border-cb-divider bg-cb-base px-3.5 py-2.5 text-sm text-cb-text focus:border-cb-accent focus:outline-none" />
+                  </div>  
+              </div>
+
+              <!-- Location -->
+              <div class="space-y-3">
+                <p class="text-xs font-semibold text-cb-muted">Location</p>
+                <div class="grid grid-cols-3 gap-3">
+                  <div>
+                    <label class="mb-1 block text-[10px] text-cb-muted">State</label>
+                    <div class="bg-cb-field rounded-md">
+                    <input v-model="editForm.location.state" type="text" placeholder="Lagos"
+                      class="w-full rounded-xl border border-cb-divider bg-cb-base px-3 py-2.5 text-sm text-cb-text placeholder:text-cb-muted-40 focus:border-cb-accent focus:outline-none" />
+                    </div>
+                  </div>
+                  <div>
+                    <label class="mb-1 block text-[10px] text-cb-muted">LGA</label>
+                    <div class="bg-cb-field rounded-md">
+                    <input v-model="editForm.location.localGovt" type="text" placeholder="Ikeja"
+                      class="w-full rounded-xl border border-cb-divider bg-cb-base px-3 py-2.5 text-sm text-cb-text placeholder:text-cb-muted-40 focus:border-cb-accent focus:outline-none" />
+                      </div>
+                  </div>
+                  <div>
+                    <label class="mb-1 block text-[10px] text-cb-muted">Village / Area</label>
+                    <div class="bg-cb-field rounded-md">
+                    <input v-model="editForm.location.village" type="text" placeholder="GRA"
+                      class="w-full rounded-xl border border-cb-divider bg-cb-base px-3 py-2.5 text-sm text-cb-text placeholder:text-cb-muted-40 focus:border-cb-accent focus:outline-none" />
+                      </div>  
+                  </div>
+                </div>
+              </div>
+
+              <!-- API error -->
+              <p v-if="editError" class="rounded-xl border border-cb-negative/30 bg-cb-negative-subtle px-3.5 py-2.5 text-xs font-semibold text-cb-negative">
+                {{ editError }}
+              </p>
+            </div>
+
+            <!-- Footer -->
+            <div class="flex gap-3 border-t border-cb-divider px-5 py-4">
+              <button @click="showEditModal = false" class="flex-1 rounded-xl border border-cb-divider bg-cb-base py-2.5 text-sm font-semibold text-cb-muted hover:bg-cb-field">
+                Cancel
+              </button>
+              <button @click="handleEditSubmit" :disabled="errandStore.actionLoading"
+                class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-cb-accent py-2.5 text-sm font-semibold text-cb-contrast hover:bg-cb-accent-dark disabled:opacity-60">
+                <i v-if="errandStore.actionLoading" class="fa-solid fa-spinner fa-spin"></i>
+                <i v-else class="fa-solid fa-floppy-disk"></i>
+                Save changes
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
     <Teleport to="body">
       <Transition name="overlay">
         <ConfirmModal v-if="confirmModal.open" :title="confirmModal.title" :message="confirmModal.message" :confirm-text="confirmModal.confirmText" :variant="confirmModal.variant" :loading="errandStore.actionLoading" @confirm="confirmModal.onConfirm" @cancel="confirmModal.open = false" />
@@ -519,8 +652,75 @@ const payLoading = ref(false)
 const showBidModal = ref(false)
 const showCompleteModal = ref(false)
 const showDisputeModal = ref(false)
+const showEditModal = ref(false)
 const bidError = ref('')
+const editError = ref('')
 const confirmModal = ref({ open: false, title: '', message: '', confirmText: '', variant: 'danger', onConfirm: null })
+
+// ─── Edit form ─────────────────────────────────────────────────
+const editForm = ref({
+  title: '',
+  description: '',
+  budgetType: 'fixed',
+  budget: null,
+  address: '',
+  deadline: '',
+  location: { state: '', localGovt: '', village: '' },
+})
+
+function openEditModal() {
+  if (!errand.value) return
+  const e = errand.value
+  // Pre-fill form with current errand values
+  editForm.value = {
+    title: e.title || '',
+    description: e.description || '',
+    budgetType: e.budgetType || 'fixed',
+    budget: e.budget ?? null,
+    address: e.address || '',
+    // datetime-local input needs "YYYY-MM-DDTHH:MM" format
+    deadline: e.deadline ? e.deadline.slice(0, 16) : '',
+    location: {
+      state: e.location?.state || '',
+      localGovt: e.location?.localGovt || '',
+      village: e.location?.village || '',
+    },
+  }
+  editError.value = ''
+  showEditModal.value = true
+}
+
+async function handleEditSubmit() {
+  editError.value = ''
+  // Build payload — only include non-empty fields
+  const payload = {}
+  if (editForm.value.title.trim()) payload.title = editForm.value.title.trim()
+  if (editForm.value.description.trim()) payload.description = editForm.value.description.trim()
+  if (editForm.value.budgetType) payload.budgetType = editForm.value.budgetType
+  if (editForm.value.budget !== null && editForm.value.budget !== '') payload.budget = Number(editForm.value.budget)
+  if (editForm.value.address.trim()) payload.address = editForm.value.address.trim()
+  if (editForm.value.deadline) payload.deadline = new Date(editForm.value.deadline).toISOString()
+  const loc = editForm.value.location
+  if (loc.state || loc.localGovt || loc.village) {
+    payload.location = {}
+    if (loc.state) payload.location.state = loc.state
+    if (loc.localGovt) payload.location.localGovt = loc.localGovt
+    if (loc.village) payload.location.village = loc.village
+  }
+
+  if (!Object.keys(payload).length) {
+    editError.value = 'No changes to save.'
+    return
+  }
+
+  try {
+    await errandStore.editErrand(errand.value._id, payload)
+    showEditModal.value = false
+    toast.success('Errand updated successfully')
+  } catch {
+    editError.value = errandStore.error || 'Failed to save changes'
+  }
+}
 
 const errand = computed(() => errandStore.current)
 const currentUserId = computed(() => userStore.user?._id || null)

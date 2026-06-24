@@ -258,4 +258,29 @@ export const adminApi = {
     );
     return response.data;
   },
+
+  // ─── Withdrawals ────────────────────────────────────────────────────────────
+
+  /**
+   * List all withdrawals across all users.
+   * GET /api/v1/withdrawals/admin/all
+   * @param {Object} params - Optional query params (page, limit, status, etc.)
+   */
+  async listWithdrawals(params = {}) {
+    const response = await api.get("/api/v1/withdrawals/admin/all", { params });
+    return response.data;
+  },
+
+  /**
+   * Manually process a pending withdrawal.
+   * Bypasses the hold period and immediately initiates the Paystack transfer.
+   * POST /api/v1/withdrawals/admin/:withdrawalId/process
+   * @param {string} withdrawalId
+   */
+  async processWithdrawal(withdrawalId) {
+    const response = await api.post(
+      `/api/v1/withdrawals/admin/${withdrawalId}/process`
+    );
+    return response.data;
+  },
 };

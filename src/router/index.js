@@ -323,6 +323,13 @@ const routes = [
         component: () => import("@/pages/admin/Clearances/ClearanceDetail.vue"),
       },
 
+      // ─── Withdrawals ───────────
+      {
+        path: "withdrawals",
+        name: "AdminWithdrawals",
+        component: () => import("@/pages/admin/withdrawals/AdminWithdrawals.vue"),
+      },
+
       // ─── Support ───────────────
       {
         path: "support",

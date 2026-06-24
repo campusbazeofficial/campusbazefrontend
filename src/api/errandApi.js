@@ -120,19 +120,32 @@ export const errandApi = {
     return response.data;
   },
 
- 
-// ─── Matching ──────────────────────────────────────────────
-async getErrandMatches(errandId) {
-  const response = await api.get(`/api/v1/errands/${errandId}/matches`);
-  return response.data;
-},
+  // ─── Edit ─────────────────────────────────────────────────
+  /**
+   * Edit a posted errand (poster only, no bids yet).
+   * All fields optional — only provided fields are updated.
+   * Blocked once any runner has placed a bid.
+   */
+  async editErrand(errandId, data) {
+    const response = await api.patch(
+      `/api/v1/errands/${errandId}/edit`,
+      data,
+    );
+    return response.data;
+  },
 
-// ─── Deadline Extension ────────────────────────────────────
-async extendDeadline(errandId, data) {
-  const response = await api.patch(
-    `/api/v1/errands/${errandId}/extend-deadline`,
-    data
-  );
-  return response.data;
-},
+  // ─── Matching ──────────────────────────────────────────────
+  async getErrandMatches(errandId) {
+    const response = await api.get(`/api/v1/errands/${errandId}/matches`);
+    return response.data;
+  },
+
+  // ─── Deadline Extension ────────────────────────────────────
+  async extendDeadline(errandId, data) {
+    const response = await api.patch(
+      `/api/v1/errands/${errandId}/extend-deadline`,
+      data
+    );
+    return response.data;
+  },
 };

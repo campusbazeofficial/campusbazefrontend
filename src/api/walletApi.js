@@ -46,22 +46,38 @@ export const walletApi = {
   },
 
   /**
-   * Initialize NGN withdrawal to bank account 
-   * Debits CBC immediately. If the Paystack transfer fails, CBC is automatically refunded. Minimum 500 CBC. Only one pending withdrawal allowed at a time.
-   * POST /api/v1/wallet/withdrawal/initialize
+   * Request a withdrawal to bank account.
+   * Debits NGN earnings immediately and holds for 6hrs (verified + paid plan)
+   * or 24hrs (everyone else). The transfer fires automatically after the hold
+   * period via cron. Blocked if the user has active disputes. Minimum ₦500.
+   * POST /api/v1/withdrawals/request
    * @param {Object} data - { amountNGN, bankCode, accountNumber, accountName, bankName }
    */
-  async initializeWithdrawal(data) {
-    const response = await api.post("/api/v1/wallet/withdrawal/initialize", data);
+  async requestWithdrawal(data) {
+    const response = await api.post("/api/v1/withdrawals/request", data);
     return response.data;
   },
 
   /**
-   * Get withdrawal history
-   * GET /api/v1/wallet/withdrawal/history
+   * Get withdrawal history.
+   * Returns all withdrawals for the authenticated user, sorted by most
+   * recent. Paystack internal codes are excluded.
+   * GET /api/v1/withdrawals
    */
   async getWithdrawalHistory() {
-    const response = await api.get("/api/v1/wallet/withdrawal/history");
+    const response = await api.get("/api/v1/withdrawals");
+    return response.data;
+  },
+
+  /**
+   * Cancel a pending withdrawal during its hold period.
+   * Can only cancel while status is "pending" and releaseAt has not passed.
+   * Earnings are immediately refunded back to the wallet.
+   * DELETE /api/v1/withdrawals/:withdrawalId/cancel
+   * @param {string} withdrawalId
+   */
+  async cancelWithdrawal(withdrawalId) {
+    const response = await api.delete(`/api/v1/withdrawals/${withdrawalId}/cancel`);
     return response.data;
   },
 

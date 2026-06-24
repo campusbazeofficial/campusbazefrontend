@@ -87,6 +87,15 @@
           <span class="font-medium text-cb-text">{{ errand.poster.averageRating.toFixed(1) }}</span>
         </span>
 
+        <!-- Location -->
+        <span v-if="errand.location?.state" class="inline-flex min-w-0 items-center gap-1.5" :title="locationLabel">
+          <i class="fa-solid fa-location-dot text-[10px] text-cb-muted-40"></i>
+          <span class="truncate max-w-[180px]">
+            <span class="font-medium text-cb-text">{{ errand.location.state }}</span>
+            <span v-if="localityLabel" class="text-cb-muted"> · {{ localityLabel }}</span>
+          </span>
+        </span>
+
         <!-- Time posted -->
         <span class="inline-flex items-center gap-1.5">
           <i class="fa-regular fa-clock text-[10px] text-cb-muted-40"></i>
@@ -169,6 +178,21 @@ const posterInitials = computed(() =>
     .map(w => w[0]?.toUpperCase() ?? '')
     .join('')
 )
+
+// ── Location ─────────────────────────────────────────────────────────
+// State is the primary signal for runners (bidding is state-restricted);
+// LGA/village are shown as secondary detail.
+const locationLabel = computed(() => {
+  const loc = props.errand.location
+  if (!loc) return ''
+  return [loc.state, loc.localGovt, loc.village].filter(Boolean).join(', ')
+})
+
+const localityLabel = computed(() => {
+  const loc = props.errand.location
+  if (!loc) return ''
+  return [loc.localGovt, loc.village].filter(Boolean).join(', ')
+})
 
 // ── Status badge style ───────────────────────────────────────────────
 const statusStyle = computed(() => {

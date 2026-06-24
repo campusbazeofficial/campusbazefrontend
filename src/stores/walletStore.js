@@ -20,10 +20,11 @@ export const TRANSACTION_DIRECTION = {
 };
 
 export const WITHDRAWAL_STATUS = {
-  PROCESSING: "processing",
-  COMPLETED: "completed",
-  FAILED: "failed",
-  CANCELLED: "cancelled",
+  PENDING: "pending", // requested, in hold period (6hr verified+paid / 24hr everyone else)
+  PROCESSING: "processing", // hold passed, transfer initiated
+  PAID: "paid", // transfer.success confirmed
+  FAILED: "failed", // transfer.failed — balance refunded
+  CANCELLED: "cancelled", // cancelled during hold period
 };
 
 export const useWalletStore = defineStore("wallet", () => {
@@ -97,14 +98,18 @@ export const useWalletStore = defineStore("wallet", () => {
 
   const pendingWithdrawals = computed(() => {
     return withdrawals.value.filter(
-      (w) => w.status === WITHDRAWAL_STATUS.PROCESSING,
+      (w) =>
+        w.status === WITHDRAWAL_STATUS.PENDING ||
+        w.status === WITHDRAWAL_STATUS.PROCESSING,
     );
   });
 
   const completedWithdrawals = computed(() => {
-    return withdrawals.value.filter(
-      (w) => w.status === WITHDRAWAL_STATUS.COMPLETED,
-    );
+    return withdrawals.value.filter((w) => w.status === WITHDRAWAL_STATUS.PAID);
+  });
+
+  const cancellableWithdrawals = computed(() => {
+    return withdrawals.value.filter((w) => canCancelWithdrawal(w));
   });
 
   // ─── Helpers ───────────────────────────────────────────────────────────────
@@ -162,12 +167,16 @@ export const useWalletStore = defineStore("wallet", () => {
 
   function getWithdrawalStatusBadge(status) {
     const badges = {
+      [WITHDRAWAL_STATUS.PENDING]: {
+        label: "Pending",
+        class: "bg-cb-warning-subtle text-cb-warning",
+      },
       [WITHDRAWAL_STATUS.PROCESSING]: {
         label: "Processing",
         class: "bg-cb-warning-subtle text-cb-warning",
       },
-      [WITHDRAWAL_STATUS.COMPLETED]: {
-        label: "Completed",
+      [WITHDRAWAL_STATUS.PAID]: {
+        label: "Paid",
         class: "bg-cb-positive-subtle text-cb-positive",
       },
       [WITHDRAWAL_STATUS.FAILED]: {
@@ -182,6 +191,36 @@ export const useWalletStore = defineStore("wallet", () => {
     return (
       badges[status] || { label: status, class: "bg-cb-field text-cb-muted" }
     );
+  }
+
+  /**
+   * Whether a withdrawal can still be cancelled — only while it's pending
+   * and the hold period (releaseAt) hasn't passed yet.
+   */
+  function canCancelWithdrawal(withdrawal) {
+    if (!withdrawal) return false;
+    if (withdrawal.status !== WITHDRAWAL_STATUS.PENDING) return false;
+    if (!withdrawal.releaseAt) return false;
+    return new Date(withdrawal.releaseAt).getTime() > Date.now();
+  }
+
+  /**
+   * Human-readable countdown until a withdrawal's hold period ends
+   * (e.g. "3h 12m left", "42m left", "Releasing now").
+   */
+  function getHoldTimeRemaining(releaseAt) {
+    if (!releaseAt) return "";
+    const diffMs = new Date(releaseAt).getTime() - Date.now();
+    if (diffMs <= 0) return "Releasing now";
+
+    const totalMinutes = Math.floor(diffMs / 60000);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    if (hours > 0) {
+      return `${hours}h ${minutes}m left`;
+    }
+    return `${minutes}m left`;
   }
 
   function searchBanks(query) {
@@ -358,16 +397,15 @@ export const useWalletStore = defineStore("wallet", () => {
   }
 
   /**
-   * Initialize withdrawal
+   * Request a withdrawal
    * @param {Object} data - { amountNGN, bankCode, accountNumber, accountName, bankName }
    */
-  async function withdraw(data) {
+  async function requestWithdrawal(data) {
     actionLoading.value = true;
     error.value = null;
 
     try {
-      const res = await walletApi.initializeWithdrawal(data);
-      const resData = res?.data || {};
+      const res = await walletApi.requestWithdrawal(data);
 
       // Refresh balance after withdrawal
       await fetchBalance();
@@ -379,7 +417,7 @@ export const useWalletStore = defineStore("wallet", () => {
       error.value =
         err.response?.data?.message ||
         err.message ||
-        "Failed to initialize withdrawal";
+        "Failed to request withdrawal";
       throw err;
     } finally {
       actionLoading.value = false;
@@ -395,9 +433,10 @@ export const useWalletStore = defineStore("wallet", () => {
 
     try {
       const res = await walletApi.getWithdrawalHistory();
-      const data = res?.data || {};
+      const data = res?.data;
 
-      withdrawals.value = data.withdrawals || [];
+      // API returns data as a flat array of withdrawals
+      withdrawals.value = Array.isArray(data) ? data : data?.withdrawals || [];
 
       return res;
     } catch (err) {
@@ -409,6 +448,34 @@ export const useWalletStore = defineStore("wallet", () => {
       throw err;
     } finally {
       withdrawalsLoading.value = false;
+    }
+  }
+
+  /**
+   * Cancel a pending withdrawal during its hold period.
+   * Earnings are immediately refunded back to the wallet.
+   * @param {string} withdrawalId
+   */
+  async function cancelWithdrawal(withdrawalId) {
+    actionLoading.value = true;
+    error.value = null;
+
+    try {
+      const res = await walletApi.cancelWithdrawal(withdrawalId);
+
+      // Refresh balance (refund applied) and withdrawal list
+      await fetchBalance();
+      await fetchWithdrawalHistory();
+
+      return res;
+    } catch (err) {
+      error.value =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to cancel withdrawal";
+      throw err;
+    } finally {
+      actionLoading.value = false;
     }
   }
 
@@ -494,6 +561,7 @@ export const useWalletStore = defineStore("wallet", () => {
     totalDebits,
     pendingWithdrawals,
     completedWithdrawals,
+    cancellableWithdrawals,
 
     // Helpers
     formatTransactionType,
@@ -502,6 +570,8 @@ export const useWalletStore = defineStore("wallet", () => {
     getTransactionIcon,
     getTransactionColor,
     getWithdrawalStatusBadge,
+    canCancelWithdrawal,
+    getHoldTimeRemaining,
     searchBanks,
 
     // Actions
@@ -510,8 +580,9 @@ export const useWalletStore = defineStore("wallet", () => {
     fetchBanks,
     purchaseCBC,
     verifyPurchase,
-    withdraw,
+    requestWithdrawal,
     fetchWithdrawalHistory,
+    cancelWithdrawal,
     resetError,
     clearWalletData,
     refreshWalletData,

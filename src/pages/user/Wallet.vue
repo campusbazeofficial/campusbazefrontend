@@ -166,10 +166,10 @@
           <div>
             <p class="text-sm font-semibold text-cb-warning">
               {{ walletStore.pendingWithdrawals.length }}
-              withdrawal{{ walletStore.pendingWithdrawals.length > 1 ? 's' : '' }} processing
+              withdrawal{{ walletStore.pendingWithdrawals.length > 1 ? 's' : '' }} in progress
             </p>
             <p class="mt-0.5 text-xs text-cb-muted">
-              Transfers are usually completed within 1–3 business days.
+             Withdrawals release automatically after a hold period (up to 2 hours for verified and subscribed members; up to 24 hours for non-verified). You can cancel any pending withdrawal before it releases.
             </p>
           </div>
         </div>
@@ -274,7 +274,20 @@
               <p class="text-xs text-cb-muted mt-0.5 font-mono">
                 ••••&nbsp;{{ w.accountNumber.slice(-4) }}
                 <span class="font-sans mx-1">·</span>
-                {{ walletStore.formatDate(w.initiatedAt) }}
+                {{ walletStore.formatDate(w.requestedAt || w.initiatedAt) }}
+              </p>
+              <p
+                v-if="walletStore.canCancelWithdrawal(w) && now"
+                class="text-xs text-cb-warning mt-1 flex items-center gap-1.5"
+              >
+                <i class="fa-solid fa-hourglass-half text-[10px]" />
+                {{ walletStore.getHoldTimeRemaining(w.releaseAt) }}
+              </p>
+              <p
+                v-else-if="w.status === 'failed' && w.failureReason"
+                class="text-xs text-cb-negative mt-1"
+              >
+                {{ w.failureReason }}
               </p>
             </div>
           </div>
@@ -286,6 +299,18 @@
             >
               {{ walletStore.getWithdrawalStatusBadge(w.status).label }}
             </span>
+            <button
+              v-if="walletStore.canCancelWithdrawal(w) && now"
+              class="flex items-center gap-1.5 rounded-lg border border-cb-negative/25 px-2.5 py-1 text-xs font-semibold text-cb-negative hover:bg-cb-negative/8 transition-colors disabled:opacity-50"
+              :disabled="cancellingId === w._id"
+              @click="handleCancelWithdrawal(w)"
+            >
+              <i
+                class="fa-solid"
+                :class="cancellingId === w._id ? 'fa-spinner fa-spin' : 'fa-xmark'"
+              />
+              Cancel
+            </button>
           </div>
         </div>
       </div>
@@ -334,7 +359,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import { useWalletStore } from "@/stores/walletStore";
 import { useToast } from "@/composables/useToast";
@@ -355,6 +380,13 @@ function goToHistory() {
 const showBuyCbc = ref(false);
 const showWithdraw = ref(false);
 const balanceVisible = ref(false);
+const cancellingId = ref(null);
+
+// Ticks every 30s so the hold countdown re-renders without a manual refresh.
+// The countdown text itself is still derived entirely from releaseAt (server data) —
+// this just forces Vue to re-evaluate it as time passes.
+const now = ref(Date.now());
+let clockInterval = null;
 
 function openBuyCbc() {
   showBuyCbc.value = true;
@@ -380,11 +412,23 @@ async function handleBuyCbc(cbcAmount) {
 
 async function handleWithdraw(data) {
   try {
-    await walletStore.withdraw(data);
+    await walletStore.requestWithdrawal(data);
     showWithdraw.value = false;
-    toast.success("Withdrawal initiated! Funds will arrive within 1–3 business days.");
+    toast.success("Withdrawal requested! It will be released automatically after the hold period.");
   } catch {
-    toast.error(walletStore.error || "Failed to process withdrawal");
+    toast.error(walletStore.error || "Failed to request withdrawal");
+  }
+}
+
+async function handleCancelWithdrawal(withdrawal) {
+  cancellingId.value = withdrawal._id;
+  try {
+    await walletStore.cancelWithdrawal(withdrawal._id);
+    toast.success("Withdrawal cancelled. Funds have been refunded to your earnings.");
+  } catch {
+    toast.error(walletStore.error || "Failed to cancel withdrawal");
+  } finally {
+    cancellingId.value = null;
   }
 }
 
@@ -401,6 +445,25 @@ onMounted(() => {
   walletStore.fetchBalance().catch(() => toast.error("Failed to load balance"));
   walletStore.fetchTransactions().catch(() => {});
   walletStore.fetchWithdrawalHistory().catch(() => {});
+
+  // Re-render the countdown periodically.
+  clockInterval = setInterval(() => {
+    now.value = Date.now();
+
+    // If any withdrawal's hold should have ended, re-pull from the server
+    // so status (processing/paid/failed) replaces the stale "pending" view
+    // instead of relying on client-side time math.
+    const holdJustEnded = walletStore.withdrawals.some(
+      (w) => w.status === "pending" && new Date(w.releaseAt).getTime() <= now.value,
+    );
+    if (holdJustEnded) {
+      walletStore.fetchWithdrawalHistory().catch(() => {});
+    }
+  }, 30000);
+});
+
+onUnmounted(() => {
+  if (clockInterval) clearInterval(clockInterval);
 });
 </script>
 

@@ -176,6 +176,11 @@ export const adminLinks = [
         icon: "fa-solid fa-user-group",
       },
       {
+        path: "/admin/withdrawals",
+        label: "Withdrawals",
+        icon: "fa-solid fa-money-bill-wave",
+      },
+      {
         path: "/admin/verifications",
         label: "Verifications",
         icon: "fa-solid fa-id-card",
