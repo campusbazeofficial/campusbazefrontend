@@ -56,7 +56,7 @@
           </span>
           <span class="w-px h-4 bg-(--color-cb-divider)"></span>
           <span class="flex items-center gap-1">
-            <span class="font-semibold text-(--color-cb-text) tabular-nums">Earnings: {{ formatNGN(walletStore.ngnEarnings ?? 0) }}</span>
+            <span class="font-semibold text-(--color-cb-text) tabular-nums">Earnings: ₦{{ (walletStore.ngnEarnings ?? 0).toLocaleString() }}</span>
           </span>
         </template>
       </router-link>

@@ -40,6 +40,14 @@ export const SUSPENSION_OUTCOME = {
   UNSUSPENDED: "unsuspended",
 };
 
+export const WITHDRAWAL_STATUS = {
+  PENDING:    "pending",     // requested, in hold period
+  PROCESSING: "processing",  // hold passed (or admin-forced), transfer initiated
+  PAID:       "paid",        // transfer.success confirmed
+  FAILED:     "failed",      // transfer.failed — balance refunded
+  CANCELLED:  "cancelled",   // cancelled by user during hold period
+};
+
 // ─── Default meta shape ───────────────────────────────────────────────────
 
 const defaultMeta = () => ({
@@ -107,6 +115,14 @@ export const useAdminStore = defineStore("admin", () => {
   const bulkClearanceLoading       = ref(false);
   const selectedClearanceIds       = ref([]); // tracks checked items for bulk ops
 
+  // ── Withdrawals ────────────────────────────────────────────────────────────
+
+  const withdrawals        = ref([]);
+  const withdrawalsLoading = ref(false);
+  const withdrawalsMeta    = ref(defaultMeta());
+  const withdrawalActionLoading = ref(false); // tracks the "process" action
+  const processingWithdrawalId  = ref(null);  // which row is being processed, for per-row spinner
+
   // ── Shared error ───────────────────────────────────────────────────────────
 
   const error = ref(null);
@@ -142,6 +158,16 @@ export const useAdminStore = defineStore("admin", () => {
   const allClearancesSelected = computed(() =>
     pendingClearances.value.length > 0 &&
     pendingClearances.value.every((c) => selectedClearanceIds.value.includes(c._id))
+  );
+
+  // Withdrawals
+  const pendingWithdrawals    = computed(() => withdrawals.value.filter((w) => w.status === WITHDRAWAL_STATUS.PENDING));
+  const processingWithdrawals = computed(() => withdrawals.value.filter((w) => w.status === WITHDRAWAL_STATUS.PROCESSING));
+  const paidWithdrawals       = computed(() => withdrawals.value.filter((w) => w.status === WITHDRAWAL_STATUS.PAID));
+  const failedWithdrawals     = computed(() => withdrawals.value.filter((w) => w.status === WITHDRAWAL_STATUS.FAILED));
+  const cancelledWithdrawals  = computed(() => withdrawals.value.filter((w) => w.status === WITHDRAWAL_STATUS.CANCELLED));
+  const totalPendingWithdrawalAmount = computed(() =>
+    pendingWithdrawals.value.reduce((sum, w) => sum + (w.amountNGN || 0), 0)
   );
 
   // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -759,12 +785,78 @@ export const useAdminStore = defineStore("admin", () => {
     return selectedClearanceIds.value.includes(clearanceId);
   }
 
+  // ── Withdrawal actions ──────────────────────────────────────────────────
+
+  /**
+   * Fetch all withdrawals (admin view, across all users).
+   * @param {Object} params - { page, limit, status, ... }
+   */
+  async function fetchWithdrawals(params = {}) {
+    withdrawalsLoading.value = true;
+    error.value = null;
+    try {
+      const res = await adminApi.listWithdrawals(params);
+      // Response: { success, data: [...] } — flat array, no meta envelope.
+      withdrawals.value = Array.isArray(res?.data) ? res.data : [];
+      if (res?.meta) {
+        withdrawalsMeta.value = {
+          total: res.meta.total || withdrawals.value.length,
+          page: res.meta.page || 1,
+          limit: res.meta.limit || 20,
+          totalPages: res.meta.totalPages || 1,
+          hasNextPage: res.meta.hasNextPage || false,
+          hasPrevPage: res.meta.hasPrevPage || false,
+        };
+      }
+      return res;
+    } catch (err) {
+      error.value = err.response?.data?.message || err.message || "Failed to load withdrawals";
+      throw err;
+    } finally {
+      withdrawalsLoading.value = false;
+    }
+  }
+
+  /**
+   * Manually process a pending withdrawal — bypasses the hold period and
+   * immediately initiates the Paystack transfer. Patches the row's status
+   * to "processing" locally on success rather than refetching the full list.
+   * @param {string} withdrawalId
+   */
+  async function processWithdrawal(withdrawalId) {
+    processingWithdrawalId.value = withdrawalId;
+    withdrawalActionLoading.value = true;
+    error.value = null;
+    try {
+      const res = await adminApi.processWithdrawal(withdrawalId);
+      _patchWithdrawalStatus(withdrawalId, WITHDRAWAL_STATUS.PROCESSING);
+      return res;
+    } catch (err) {
+      error.value = err.response?.data?.message || err.message || "Failed to process withdrawal";
+      throw err;
+    } finally {
+      withdrawalActionLoading.value = false;
+      processingWithdrawalId.value = null;
+    }
+  }
+
+  function isProcessingWithdrawal(withdrawalId) {
+    return processingWithdrawalId.value === withdrawalId;
+  }
+
   // ── Private helpers ────────────────────────────────────────────────────
 
   function _patchClearanceStatus(clearanceId, status) {
     const idx = clearances.value.findIndex((c) => c._id === clearanceId);
     if (idx !== -1) {
       clearances.value[idx] = { ...clearances.value[idx], status };
+    }
+  }
+
+  function _patchWithdrawalStatus(withdrawalId, status) {
+    const idx = withdrawals.value.findIndex((w) => w._id === withdrawalId);
+    if (idx !== -1) {
+      withdrawals.value[idx] = { ...withdrawals.value[idx], status };
     }
   }
 
@@ -795,6 +887,9 @@ export const useAdminStore = defineStore("admin", () => {
 
     clearances.value = []; clearancesMeta.value = defaultMeta();
     selectedClearanceIds.value = [];
+
+    withdrawals.value = []; withdrawalsMeta.value = defaultMeta();
+    processingWithdrawalId.value = null;
 
     error.value = null;
   }
@@ -827,6 +922,10 @@ export const useAdminStore = defineStore("admin", () => {
     clearances, clearancesLoading, clearancesMeta,
     clearanceActionLoading, bulkClearanceLoading, selectedClearanceIds,
 
+    // ── Withdrawal state
+    withdrawals, withdrawalsLoading, withdrawalsMeta,
+    withdrawalActionLoading, processingWithdrawalId,
+
     // ── Shared
     error,
 
@@ -845,6 +944,10 @@ export const useAdminStore = defineStore("admin", () => {
 
     // ── Clearance getters
     pendingClearances, approvedClearances, rejectedClearances, allClearancesSelected,
+
+    // ── Withdrawal getters
+    pendingWithdrawals, processingWithdrawals, paidWithdrawals,
+    failedWithdrawals, cancelledWithdrawals, totalPendingWithdrawalAmount,
 
     // ── Verification actions
     fetchVerifications, fetchVerification, fetchVerificationDocument, reviewVerification,
@@ -866,6 +969,9 @@ export const useAdminStore = defineStore("admin", () => {
     reapproveClearance, bulkApproveClearances,
     toggleClearanceSelection, selectAllPendingClearances,
     clearClearanceSelection, isClearanceSelected,
+
+    // ── Withdrawal actions
+    fetchWithdrawals, processWithdrawal, isProcessingWithdrawal,
 
     // ── Utility
     resetError, clearSelectedVerification, clearSelectedUser,

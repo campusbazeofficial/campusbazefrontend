@@ -808,6 +808,42 @@ export const useErrandStore = defineStore("errand", () => {
     error.value = null;
   }
 
+  // ─── Edit Errand ──────────────────────────────────────────────
+  /**
+   * Edit a posted errand.
+   * Only allowed while status is 'posted' and no bids have been placed.
+   * Merges updated fields into current + posted list on success.
+   */
+  async function editErrand(errandId, data) {
+    actionLoading.value = true;
+    error.value = null;
+    try {
+      const res = await errandApi.editErrand(errandId, data);
+      const updated = res?.data?.errand ?? res?.errand ?? null;
+      if (updated) {
+        // Patch current detail view
+        if (current.value?._id === errandId) {
+          current.value = { ...current.value, ...updated };
+        }
+        // Patch posted list entry
+        const idx = posted.value.findIndex((e) => e._id === errandId);
+        if (idx !== -1) {
+          posted.value[idx] = { ...posted.value[idx], ...updated };
+        }
+      }
+      return res;
+    } catch (err) {
+      error.value =
+        err.response?.data?.data?.message ||
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to edit errand";
+      throw err;
+    } finally {
+      actionLoading.value = false;
+    }
+  }
+
   // Refresh all user-related data
   async function refreshUserData() {
     try {
@@ -937,6 +973,7 @@ async function extendDeadline(errandId, data) {
 
     fetchErrandMatches,
     extendDeadline,
+    editErrand,
 
     clearCurrent,
     resetError,

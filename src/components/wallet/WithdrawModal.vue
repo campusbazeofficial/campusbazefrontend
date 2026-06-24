@@ -173,10 +173,9 @@
 
         <!-- Warning note -->
         <div class="flex items-start gap-2.5 rounded-xl bg-cb-warning-subtle border border-cb-warning/20 px-4 py-3">
-          <i class="fa-solid fa-triangle-exclamation text-xs text-cb-warning mt-0.5 shrink-0" />
+          <!-- <i class="fa-solid fa-triangle-exclamation text-xs text-cb-warning mt-0.5 shrink-0" /> -->
           <p class="text-xs text-cb-muted leading-relaxed">
-            CBC is debited immediately. If the transfer fails, your balance will be automatically refunded.
-            Only one pending withdrawal is allowed at a time.
+          Your earnings are debited immediately and held before the transfer is sent (up to 2 hours for verified and subscribed members; up to 24 hours for non-verified). You can cancel anytime during the hold period for an instant refund. Withdrawals are blocked while you have an active dispute.
           </p>
         </div>
       </div>
